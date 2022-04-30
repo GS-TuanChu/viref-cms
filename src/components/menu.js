@@ -32,14 +32,25 @@ export const menuItems = [
         link: "/campaigns"
     },
     {
-        id: 1111,
+        id: 6,
+        label: "Products",
+        icon: "uil-box",
+        link: "/products"
+    },
+    {
+        id: 7,
+        label: 'History',
+        icon: 'uil-history',
+        link: '/history',
+    },
+    {
+        id: 8,
         label: 'menuitems.calendar.text',
         icon: 'uil-calender',
         link: '/calendar',
     },
-
     {
-        id: 61,
+        id: 9,
         label: 'menuitems.chat.text',
         icon: 'uil-comments-alt',
         link: '/chat',
@@ -48,8 +59,9 @@ export const menuItems = [
             text: 'menuitems.chat.badge',
         },
     },
+
     {
-        id: 6,
+        id: 621,
         label: 'menuitems.ecommerce.text',
         icon: 'uil-store',
         subItems: [
@@ -580,4 +592,5 @@ export const menuItems = [
             },
         ],
     },
-];
+    
+ ];

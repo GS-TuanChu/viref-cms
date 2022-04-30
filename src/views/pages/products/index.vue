@@ -2,12 +2,11 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import appConfig from '@/app.config'
-import dateMixin from '@/mixins/date.js'
 
 export default {
   components: { Layout, PageHeader },
   page: {
-    title: 'Campaigns',
+    title: 'Products',
     meta: [
       {
         name: 'description',
@@ -15,17 +14,16 @@ export default {
       },
     ],
   },
-  mixins: [dateMixin],
   data() {
     return {
-      title: 'Campaigns',
-      dataCampaigns: null,
+      title: 'Products',
+      dataProducts: null,
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
       filter: null,
-      filterOn: [],
+      filterOn: ['name', 'price', 'contact', 'description'],
       sortBy: 'age',
       sortDesc: false,
       fields: [
@@ -41,33 +39,10 @@ export default {
           key: 'description',
         },
         {
-          key: 'website',
+          key: 'price',
         },
         {
-          key: 'network',
-        },
-        {
-          key: 'amount',
-        },
-        {
-          key: 'commission',
-        },
-        {
-          key: 'type',
-        },
-        {
-          key: 'product',
-        },
-        {
-          key: 'mine',
-        },
-        {
-          key: 'startDate',
-          sortable: true,
-        },
-        {
-          key: 'endDate',
-          sortable: true,
+          key: 'contact',
         },
         'action',
       ],
@@ -85,10 +60,8 @@ export default {
   },
   mounted() {
     // Set the initial number of items
-    // this.totalRows = this.items.length;
-    this.$parse.getCampaignList().then((dataCampaigns) => {
-      
-      this.constructUserObject(dataCampaigns)
+    this.$parse.getProductList().then((dataProducts) => {
+      this.constructUserObject(dataProducts.products)
     })
   },
   methods: {
@@ -101,36 +74,31 @@ export default {
       this.currentPage = 1
     },
     constructUserObject(data) {
-      this.dataCampaigns = data.map((campaign) => {
+      this.dataProducts = data.map((product) => {
         return {
-          id: campaign.id,
-          name: campaign.get('name'),
-          description: campaign.get('description'),
-          website: campaign.get('website'),
-          network: campaign.get('network'),
-          amount: campaign.get('amount'),
-          commission: campaign.get('commission'),
-          type: campaign.get('type'),
-          product: campaign.get('product').get('name'),
-          mine: campaign.get('mine'),
-          startDate: this.formatDate(campaign.get('startDate')),
-          endDate: this.formatDate(campaign.get('endDate')),
+          id: product.id,
+          name: product.get('name'),
+          description: product.get('description'),
+          price: product.get('price'),
+          contact: product.get('contact'),
         }
       })
     },
-    addNewCampaign() {
-      this.$router.push({ name: 'campaign-create' })
-    },
-    editCampaign(id) {
+    addNewProduct() {
       this.$router.push({
-        name: 'campaign-edit',
+        name: 'product-create',
+      })
+    },
+    editProduct(id) {
+      this.$router.push({
+        name: 'product-edit',
         params: { id: id },
       })
     },
-  },
-  filters: {
-    truncate(text) {
-      return text.slice(0, 25) + '...'
+    productDeleteHandler(pid) {
+      this.$parse.deleteProduct({ pid }).then(() => {
+        location.reload(true)
+      })
     },
   },
 }
@@ -144,20 +112,20 @@ export default {
         <div>
           <div class="float-end">
             <form class="d-inline-flex mb-3">
-              <label class="my-1 me-2" for="order-selectinput">Campaings</label>
+              <label class="my-1 me-2" for="order-selectinput">Products</label>
               <select class="form-select" id="order-selectinput">
                 <option selected="">All</option>
-                <option value="1">Active</option>
-                <option value="2">Inactive</option>
+                <option value="1">Newest</option>
+                <option value="2">Oldest</option>
               </select>
             </form>
           </div>
           <button
-            @click="addNewCampaign"
+            @click="addNewProduct"
             type="button"
             class="btn btn-success mb-3"
           >
-            <i class="mdi mdi-plus me-1"></i> Add New Campaign
+            <i class="mdi mdi-plus me-1"></i> Add New Product
           </button>
         </div>
         <div
@@ -206,10 +174,11 @@ export default {
             <!-- End search -->
           </div>
           <!-- Table -->
+
           <b-table
             table-class="table table-centered datatable table-card-list"
             thead-tr-class="bg-transparent"
-            :items="dataCampaigns"
+            :items="dataProducts"
             :fields="fields"
             responsive="sm"
             :per-page="perPage"
@@ -220,19 +189,27 @@ export default {
             :filter-included-fields="filterOn"
             @filtered="onFiltered"
           >
-            <template v-slot:cell(description)="dataCampaigns">
-              {{ dataCampaigns.item.description | truncate }}
+            <template v-slot:cell(check)="data">
+              <div class="custom-control custom-checkbox text-center">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  :id="`contacusercheck${data.item.id}`"
+                />
+                <label
+                  class="custom-control-label"
+                  :for="`contacusercheck${data.item.id}`"
+                ></label>
+              </div>
             </template>
-            <template v-slot:cell(action)="dataCampaigns">
+            <template v-slot:cell(action)="data">
               <ul class="list-inline mb-0">
-                <li
-                  class="list-inline-item"
-                  @click="editCampaign(dataCampaigns.item.id)"
-                >
+                <li class="list-inline-item">
                   <a
                     href="javascript:void(0);"
                     class="px-2 text-primary"
                     v-b-tooltip.hover
+                    @click="editProduct(data.item.id)"
                     title="Edit"
                   >
                     <i class="uil uil-pen font-size-18"></i>
@@ -243,6 +220,7 @@ export default {
                     href="javascript:void(0);"
                     class="px-2 text-danger"
                     v-b-tooltip.hover
+                    @click="productDeleteHandler(data.item.id)"
                     title="Delete"
                   >
                     <i class="uil uil-trash-alt font-size-18"></i>

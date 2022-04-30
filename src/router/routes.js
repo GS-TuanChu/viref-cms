@@ -658,14 +658,6 @@ export default [
         component: () => import('../views/pages/users/index'),
     },
     {
-        path: '/users/create',
-        name: 'user-create',
-        meta: {
-            authRequired: true,
-        },
-        component: () => import('../views/pages/utility/comingsoon'),
-    },
-    {
         path: '/users/edit/:id',
         name: 'user-edit',
         meta: {
@@ -680,5 +672,53 @@ export default [
             authRequired: true,
         },
         component: () => import('../views/pages/campaigns/index'),
+    },
+    {
+        path: '/campaigns/edit/:id',
+        name: 'campaign-edit',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/campaigns/edit'),
+    },
+    {
+        path: '/campaigns/create',
+        name: 'campaign-create',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/campaigns/create'),
+    },
+    {
+        path: '/products',
+        name: 'products',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/products/index'),
+    },
+    {
+        path: '/products/edit/:id',
+        name: 'product-edit',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/products/edit'),
+    },
+    {
+        path: '/products/create',
+        name: 'product-create',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/products/create'),
+    },
+    {
+        path: '/history',
+        name: 'history',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/history/index'),
     },
 ];

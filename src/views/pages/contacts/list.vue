@@ -1,7 +1,7 @@
 <script>
-import Layout from "../../layouts/main";
-import PageHeader from "@/components/page-header";
-import appConfig from "@/app.config";
+import Layout from '../../layouts/main'
+import PageHeader from '@/components/page-header'
+import appConfig from '@/app.config'
 
 /**
  * User list component
@@ -9,87 +9,87 @@ import appConfig from "@/app.config";
 export default {
   components: { Layout, PageHeader },
   page: {
-    title: "User List",
+    title: 'User List',
     meta: [
       {
-        name: "description",
+        name: 'description',
         content: appConfig.description,
       },
     ],
   },
   data() {
     return {
-      title: "User List",
+      title: 'User List',
       items: [
         {
-          text: "Contacts",
+          text: 'Contacts',
         },
         {
-          text: "User List",
+          text: 'User List',
           active: true,
         },
       ],
       userList: [
         {
           id: 1,
-          profile: require("@/assets/images/users/avatar-2.jpg"),
-          name: "Simon Ryles",
-          position: "Full Stack Developer",
-          email: "SimonRyles@minible.com",
+          profile: require('@/assets/images/users/avatar-2.jpg'),
+          name: 'Simon Ryles',
+          position: 'Full Stack Developer',
+          email: 'SimonRyles@minible.com',
         },
         {
           id: 2,
-          profile: require("@/assets/images/users/avatar-3.jpg"),
-          name: "Marion Walker",
-          position: "Frontend Developer",
-          email: "MarionWalker@minible.com",
+          profile: require('@/assets/images/users/avatar-3.jpg'),
+          name: 'Marion Walker',
+          position: 'Frontend Developer',
+          email: 'MarionWalker@minible.com',
         },
         {
           id: 3,
-          name: "Frederick White",
-          position: "Frontend Developer",
-          email: "MarionWalker@minible.com",
+          name: 'Frederick White',
+          position: 'Frontend Developer',
+          email: 'MarionWalker@minible.com',
         },
         {
           id: 4,
-          profile: require("@/assets/images/users/avatar-4.jpg"),
-          name: "Shanon Marvin",
-          position: "Backend Developer",
-          email: "ShanonMarvin@minible.com",
+          profile: require('@/assets/images/users/avatar-4.jpg'),
+          name: 'Shanon Marvin',
+          position: 'Backend Developer',
+          email: 'ShanonMarvin@minible.com',
         },
         {
           id: 5,
-          name: "Mark Jones",
-          position: "Frontend Developer",
-          email: "MarkJones@minible.com",
+          name: 'Mark Jones',
+          position: 'Frontend Developer',
+          email: 'MarkJones@minible.com',
         },
         {
           id: 6,
-          profile: require("@/assets/images/users/avatar-7.jpg"),
-          name: "Patrick Petty",
-          position: "UI/UX Designer",
-          email: "PatrickPetty@minible.com",
+          profile: require('@/assets/images/users/avatar-7.jpg'),
+          name: 'Patrick Petty',
+          position: 'UI/UX Designer',
+          email: 'PatrickPetty@minible.com',
         },
         {
           id: 7,
-          profile: require("@/assets/images/users/avatar-8.jpg"),
-          name: "Marilyn Horton",
-          position: "Backend Developer",
-          email: "MarilynHorton@minible.com",
+          profile: require('@/assets/images/users/avatar-8.jpg'),
+          name: 'Marilyn Horton',
+          position: 'Backend Developer',
+          email: 'MarilynHorton@minible.com',
         },
         {
           id: 8,
-          profile: require("@/assets/images/users/avatar-2.jpg"),
-          name: "Neal Womack",
-          position: "Full Stack Developer",
-          email: "NealWomack@minible.com",
+          profile: require('@/assets/images/users/avatar-2.jpg'),
+          name: 'Neal Womack',
+          position: 'Full Stack Developer',
+          email: 'NealWomack@minible.com',
         },
         {
           id: 9,
-          profile: require("@/assets/images/users/avatar-2.jpg"),
-          name: "Steven Williams",
-          position: "Frontend Developer",
-          email: "StevenWilliams@minible.com",
+          profile: require('@/assets/images/users/avatar-2.jpg'),
+          name: 'Steven Williams',
+          position: 'Frontend Developer',
+          email: 'StevenWilliams@minible.com',
         },
       ],
       totalRows: 1,
@@ -98,37 +98,37 @@ export default {
       pageOptions: [10, 25, 50, 100],
       filter: null,
       filterOn: [],
-      sortBy: "age",
+      sortBy: 'age',
       sortDesc: false,
       fields: [
         {
-          key: "check",
-          label: "",
+          key: 'check',
+          label: '',
         },
         {
-          key: "name",
+          key: 'name',
         },
         {
-          key: "position",
+          key: 'position',
         },
         {
-          key: "email",
+          key: 'email',
         },
-        "action",
+        'action',
       ],
-    };
+    }
   },
   computed: {
     /**
      * Total no. of records
      */
     rows() {
-      return this.userList.length;
+      return this.userList.length
     },
   },
   mounted() {
     // Set the initial number of items
-    this.totalRows = this.items.length;
+    this.totalRows = this.items.length
   },
   methods: {
     /**
@@ -136,12 +136,12 @@ export default {
      */
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
-      this.totalRows = filteredItems.length;
-      this.currentPage = 1;
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
     },
   },
-  middleware: "authentication",
-};
+  middleware: 'authentication',
+}
 </script>
 
 <template>

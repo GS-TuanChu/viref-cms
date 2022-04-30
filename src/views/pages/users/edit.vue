@@ -9,15 +9,26 @@ export default {
   data() {
     return {
       title: "User Edit",
-      dataUser: null,
-      params: {
-        username: null,
-        email: null,
-        phone: null,
-        bankAccount: null,
-        balance: null,
-        balanceToken: null,
-      },
+      params: null,
+      selected: [],
+      roles: [
+        {
+          text: "admin",
+          value: "admin",
+        },
+        {
+          text: "server",
+          value: "server",
+        },
+        {
+          text: "marketing",
+          value: "marketing",
+        },
+        {
+          text: "customer_support",
+          value: "customer_support",
+        },
+      ],
     };
   },
   created() {
@@ -27,22 +38,51 @@ export default {
   },
   methods: {
     constructUserObject(data) {
-      this.dataUser = data.map((dataUser) => {
+      this.params = data.map((dataUser) => {
         return {
-          id: dataUser.user.id,
+          uid: dataUser.user.id,
           username: dataUser.user.get("username"),
           email: dataUser.user.get("email"),
           phone: dataUser.user.get("phone"),
-          role: dataUser.roles,
+          roles: dataUser.roles.map((r) => r.get("name")),
+          bankAccount: Number(dataUser.user.get("bankAccount")) || 0,
+          balance: dataUser.user.get("balance") || 0,
+          balanceToken: dataUser.user.get("balanceToken") || 0,
         };
-      });
+      })[0];
     },
-    submit() {
-      const params = this.params;
-      console.log(params);
+    async submit() {
+      try {
+        let params = null;
+        if (this.params.role != "unspecified") {
+          params = {
+            uid: this.params.uid,
+            role: this.params.roles[0],
+            operation: "add",
+          };
+        } else {
+          params = {
+            uid: this.params.uid,
+            role: this.params.roles[0],
+            operation: "remove",
+          };
+        }
+        console.log(params);
+        this.$parse.editUser(this.params).then((res) => {
+          if (res) {
+            this.$router.push({ name: "users" });
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
     },
     cancel() {
       this.$router.push({ name: "users" });
+    },
+    selectedRoles(event) {
+      this.params.roles = [];
+      this.params.roles.push(event.target.innerHTML);
     },
   },
 };
@@ -51,8 +91,8 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row" v-if="dataUser">
-      <div class="col-12">
+    <div class="row" v-if="params">
+      <div class="col-lg-12" id="addproduct-accordion">
         <form class="form-horizontal" role="form">
           <b-form-group
             class="mb-3"
@@ -62,11 +102,7 @@ export default {
             label="Username"
             label-for="username"
           >
-            <b-form-input
-              for="text"
-              v-model="params.username"
-              :value="dataUser[0].username"
-            ></b-form-input>
+            <b-form-input for="text" v-model="params.username"></b-form-input>
           </b-form-group>
           <b-form-group
             class="mb-3"
@@ -76,11 +112,7 @@ export default {
             label="Email"
             label-for="email"
           >
-            <b-form-input
-              for="text"
-              v-model="params.email"
-              :value="dataUser[0].email"
-            ></b-form-input>
+            <b-form-input for="text" v-model="params.email"></b-form-input>
           </b-form-group>
           <b-form-group
             class="mb-3"
@@ -90,24 +122,19 @@ export default {
             label="Phone"
             label-for="phone"
           >
-            <b-form-input
-              for="text"
-              v-model="params.phone"
-              :value="dataUser[0].phone"
-            ></b-form-input>
+            <b-form-input for="text" v-model="params.phone"></b-form-input>
           </b-form-group>
           <b-form-group
             class="mb-3"
             id="example text"
             label-cols-sm="2"
             label-cols-lg="2"
-            label="BankAccount"
+            label="Bank Account"
             label-for="bankaccount"
           >
             <b-form-input
               for="text"
               v-model="params.bankAccount"
-              :value="dataUser[0].bankAccount || 0"
             ></b-form-input>
           </b-form-group>
           <b-form-group
@@ -120,8 +147,7 @@ export default {
           >
             <b-form-input
               for="text"
-              v-model="params.balance"
-              :value="dataUser[0].balance || 0"
+              v-model.number="params.balance"
             ></b-form-input>
           </b-form-group>
           <b-form-group
@@ -129,17 +155,33 @@ export default {
             id="example text"
             label-cols-sm="2"
             label-cols-lg="2"
-            label="BalanceToken"
+            label="Balance Token"
             label-for="balanceToken"
           >
             <b-form-input
               for="text"
-              v-model="params.balanceToken"
-              :value="dataUser[0].balanceToken || 0"
+              v-model.number="params.balanceToken"
             ></b-form-input>
+          </b-form-group>
+          <b-form-group
+            class="mb-3"
+            id="example text"
+            label-cols-sm="2"
+            label-cols-lg="2"
+            label="Roles"
+            label-for="roles"
+          >
+            <b-form-checkbox-group
+              id="checkbox-group-1"
+              class="d-flex flex-wrap"
+              v-model="selected"
+              :options="roles"
+              name="flavour-1"
+            ></b-form-checkbox-group>
           </b-form-group>
         </form>
       </div>
+
       <div class="button-items text-center">
         <b-button
           @click="submit"

@@ -13,8 +13,6 @@ export default {
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
-      filter: null,
-      filterOn: [],
       sortBy: "created-at",
       sortDesc: true,
       fields: [
@@ -61,7 +59,6 @@ export default {
       });
     },
     editUser(id) {
-      console.log(id);
       this.$router.push({
         name: "user-edit",
         params: { id: id },
@@ -78,18 +75,7 @@ export default {
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <a
-                    href="javascript:void(0);"
-                    class="btn btn-success"
-                    @click="addNewUser"
-                    ><i class="mdi mdi-plus me-2"></i> Add New User</a
-                  >
-                </div>
-              </div>
-            </div>
+            
             <div class="row mt-4">
               <div class="col-sm-12 col-md-6">
                 <div id="tickets-table_length" class="dataTables_length">
@@ -133,9 +119,6 @@ export default {
                 :current-page="currentPage"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
-                :filter="filter"
-                :filter-included-fields="filterOn"
-                @filtered="onFiltered"
               >
                 <template v-slot:cell(check)="data">
                   <div class="custom-control custom-checkbox">
