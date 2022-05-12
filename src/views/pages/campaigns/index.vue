@@ -87,7 +87,7 @@ export default {
     // Set the initial number of items
     // this.totalRows = this.items.length;
     this.$parse.getCampaignList().then((dataCampaigns) => {
-      this.constructUserObject(dataCampaigns)
+      this.constructUserObject(dataCampaigns.campaigns)
     })
   },
   methods: {

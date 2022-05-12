@@ -33,7 +33,7 @@ export default {
         amount: data.amount,
         commission: data.commission,
         type: data.type,
-        product: data.product,
+        product: data.product.media,
         mine: data.mine,
         startDate: data.startDate,
         endDate: data.endDate,
@@ -80,7 +80,18 @@ export default {
       })
       return rootNode.children
     },
-    async submit() {},
+    async submit() {
+      try {
+        this.params.cid = this.$route.params.id
+        this.params.startDate = new Date(this.params.startDate)
+        this.params.endDate = new Date(this.params.endDate)
+        this.$parse.editCampaign(this.params).then((res) => {
+          console.log(res)
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
     cancel() {
       this.$router.push({ name: 'campaigns' })
     },
@@ -96,157 +107,169 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row" v-if="params">
+    <div class="row" v-if="params != null">
       <div class="col-12">
         <form class="form-horizontal" role="form">
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Ref User"
-            label-for="Ref User"
-          >
-            <template v-for="(refUser, index) in params.refUsers">
-              <ul :key="index">
-                <tree class="item" :items="refUser"></tree>
-              </ul>
-            </template>
-          </b-form-group>
+          <div class="row">
+            <b-form-group
+              class="mb-3"
+              id="example text"
+              label-cols-sm="2"
+              label-cols-lg="2"
+              label="Product"
+              label-for="product"
+            >
+              <template v-for="(product, index) of params.product">
+                <img :key="index" :src="product" />
+              </template>
+            </b-form-group>
+          </div>
+          <div class="row">
+            <b-form-group
+              class="mb-3"
+              id="example text"
+              label="Ref User"
+              label-for="Ref User"
+            >
+              <template v-for="(refUser, index) in params.refUsers">
+                <ul :key="index">
+                  <tree class="item" :items="refUser"></tree>
+                </ul>
+              </template>
+            </b-form-group>
+          </div>
 
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Name"
-            label-for="name"
-          >
-            <b-form-input for="text" v-model="params.name"></b-form-input>
-          </b-form-group>
+          <div class="row">
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Name"
+                label-for="name"
+              >
+                <b-form-input for="text" v-model="params.name"></b-form-input>
+              </b-form-group>
+            </div>
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Website"
+                label-for="website"
+              >
+                <b-form-input
+                  for="text"
+                  v-model="params.website"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+          </div>
 
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Description"
-            label-for="description"
-          >
-            <b-form-textarea
-              id="textarea"
-              v-model="params.description"
-              rows="12"
-            ></b-form-textarea>
-          </b-form-group>
+          <div class="row">
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Amount"
+                label-for="amount"
+              >
+                <b-form-input
+                  for="text"
+                  v-model.number="params.amount"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Commission"
+                label-for="commission"
+              >
+                <b-form-input
+                  for="text"
+                  v-model.number="params.commission"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Network"
+                label-for="network"
+              >
+                <b-form-input
+                  for="text"
+                  v-model.number="params.network"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Type"
+                label-for="type"
+              >
+                <b-form-input
+                  for="text"
+                  v-model.number="params.type"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+          </div>
 
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Website"
-            label-for="website"
-          >
-            <b-form-input for="text" v-model="params.website"></b-form-input>
-          </b-form-group>
+          <div class="row">
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Mine"
+                label-for="mine"
+              >
+                <b-form-input for="text"></b-form-input>
+              </b-form-group>
+            </div>
+          </div>
 
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Network"
-            label-for="network"
-          >
-            <b-form-input
-              for="text"
-              v-model.number="params.network"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group class="mb-3" id="example text">
-            <b-form inline>
-              <label for="startDate">Start Date</label>
+          <div class="row">
+            <b-form class="col-md-6">
+              <label for="startDate">Start Date:</label>
               <b-form-datepicker
                 v-model="params.startDate"
-                locale="en-US"
-              ></b-form-datepicker>
-
-              <label for="startDate">End Date</label>
-              <b-form-datepicker
-                v-model="params.endDate"
+                size="sm"
                 locale="en-US"
               ></b-form-datepicker>
             </b-form>
-          </b-form-group>
+            <b-form class="col-md-6">
+              <label for="endDate">End Date:</label>
+              <b-form-datepicker
+                v-model="params.endDate"
+                size="sm"
+                locale="en-US"
+              ></b-form-datepicker>
+            </b-form>
+          </div>
 
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Amount"
-            label-for="amount"
-          >
-            <b-form-input
-              for="text"
-              v-model.number="params.amount"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Commission"
-            label-for="commission"
-          >
-            <b-form-input
-              for="text"
-              v-model.number="params.commission"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Type"
-            label-for="type"
-          >
-            <b-form-input
-              for="text"
-              v-model.number="params.type"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Product"
-            label-for="product"
-          >
-            <b-form-input
-              for="text"
-              v-model.number="params.balanceToken"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            class="mb-3"
-            id="example text"
-            label-cols-sm="2"
-            label-cols-lg="2"
-            label="Mine"
-            label-for="mine"
-          >
-            <b-form-input for="text"></b-form-input>
-          </b-form-group>
+          <div class="row">
+            <div class="col-md-12">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Description"
+                label-for="description"
+              >
+                <b-form-textarea
+                  id="textarea"
+                  v-model="params.description"
+                  rows="12"
+                ></b-form-textarea>
+              </b-form-group>
+            </div>
+          </div>
         </form>
       </div>
       <div class="button-items text-center">
@@ -261,6 +284,9 @@ export default {
           >Cancel</b-button
         >
       </div>
+    </div>
+    <div v-else class="text-center">
+      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
   </Layout>
 </template>

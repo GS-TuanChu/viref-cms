@@ -39,7 +39,7 @@ class ParseServer {
   }
 
   async getCampaignList() {
-    const { campaigns } = await Parse.Cloud.run('campaign:list')
+    const campaigns = await Parse.Cloud.run('campaign:list')
     return campaigns
   }
 
@@ -75,6 +75,9 @@ class ParseServer {
 
   async deleteProduct(params) {
     return await Parse.Cloud.run('product:deleteProduct', params)
+  }
+  async editCampaign(params) {
+    return await Parse.Cloud.run('campaign:adminEdit', params)
   }
 }
 
