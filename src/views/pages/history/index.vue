@@ -37,6 +37,7 @@ export default {
       filter: null,
       filterOn: [],
       sortBy: 'time',
+      isSearching: false,
     }
   },
   mixins: [web3Mixin],
@@ -62,12 +63,14 @@ export default {
     },
 
     async getHistory() {
+      this.isSearching = true
       this.connectMoralis()
       const params = {
         address: this.address,
       }
       return Moralis.Cloud.run('getTransferHistory', params).then((res) => {
         this.isGetHistory = true
+        this.isSearching = false
         this.logs = this.formatData(res)
       })
     },
@@ -131,21 +134,22 @@ export default {
   <Layout>
     <h2>History</h2>
     <div>
-      <form class="mb-3 w-25">
-        <label class="my-2 me-2 col-lg-1 col-sm-2" for="order-selectinput"
-          >Network</label
-        >
+      <b-form-group
+        class="mb-3"
+        label-cols-sm="3"
+        label-cols-lg="1"
+        label="Network"
+        label-for="network"
+      >
         <select
           v-model="selectedNetwork"
-          class="form-select w-50"
+          class="form-select w-10"
           id="order-selectinput"
         >
           <option :value="networks[0]">BSC</option>
           <option :value="networks[1]">BSC Testnet</option>
         </select>
-      </form>
-    </div>
-    <div>
+      </b-form-group>
       <b-form-group
         class="mb-3"
         label-cols-sm="2"
@@ -154,13 +158,17 @@ export default {
         label-for="address"
       >
         <b-form-input
-          class="d-inline"
+          class="d-inline w-30"
           v-model="address"
           for="text"
           placeholder="Enter an address"
         ></b-form-input>
       </b-form-group>
-      <b-button @click="searchHandler" variant="primary">Search</b-button>
+      <b-button v-if="!isSearching" @click="searchHandler" variant="primary"
+        >Search</b-button
+      >
+      <b-spinner v-else class="m-2" variant="primary" role="status"></b-spinner>
+
       <div v-if="logs.length > 0" class="card mt-3">
         <div class="table-responsive mb-0">
           <b-table
@@ -244,7 +252,7 @@ export default {
           </div>
         </div>
       </div>
-      <div v-else-if="logs.length === 0 && this.isGetHistory" class="mt-3">
+      <div v-else-if="!isSearching && this.isGetHistory" class="mt-3">
         <b-alert variant="danger" show> No records found </b-alert>
       </div>
     </div>
@@ -252,6 +260,14 @@ export default {
 </template>
 
 <style>
+.w-10{
+  width: 10%;
+}
+
+.w-30 {
+  width: 30%;
+}
+
 #hidden {
   display: none;
 }

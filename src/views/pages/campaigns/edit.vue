@@ -19,7 +19,6 @@ export default {
       cid: this.$route.params.id,
     }
     this.$parse.getCampaignDetail(params).then((dataCampaign) => {
-      console.log('##### ', dataCampaign.refUsers)
       this.params = this.constructUserObject(dataCampaign)
     })
   },
@@ -38,92 +37,48 @@ export default {
         mine: data.mine,
         startDate: data.startDate,
         endDate: data.endDate,
-        refUsers: this.formatRefUsers(data.refUsers),
+        refUsers: this.createTreeStructure(data.refUsers),
       }
     },
-    formatRefUsers(data) {
-      // Array data
-      const parentNode = new Map()
-
-      const result = []
-      let i = 0
-      data.forEach((a) => {
-        // console.log(a)
-        a.forEach((u) => {
-          // console.log(u)
-          if (!parentNode.get(u)) parentNode.set(u, [])
-        })
-        result.push({
-          data: a,
-        })
-        i++
-      })
-      result.forEach((r) => {
-        let temp = []
-        for (let i = 1; i < r.data.length; i++) {
-          temp.push(r.data[i])
+    createTreeStructure(refUsers) {
+      class TreeNode {
+        constructor(value) {
+          this.value = value
+          this.children = []
         }
-        if (parentNode.has(r.data[0])) {
-          let value = parentNode.get(r.data[0])
-          value = [...value, ...temp]
-          value = value.filter((x, i, self) => self.indexOf(x) == i)
-          parentNode.set(r.data[0], value)
-        }
-      })
-      const array = []
-      // {
-      // 	id: i, pid: i -1,
-      // 	numberOfChildren: length - (i),
-      // 	name: username.get("fullname")
-      // }
-      let temp = []
-      let id = 0
-
-      for (let [key, value] of parentNode) {
-        value = [key, ...value]
-        let i = 1
-        temp = []
-        value.forEach((v) => {
-          temp.push({
-            id: i,
-            pid: i - 1,
-            name: v,
-            numberOfChildren: value.length - i,
-          })
-          i++
-        })
-        array.push(temp)
-        id++
       }
-      const res = []
-      array.forEach((a) => {
-        if (a.length > 1) res.push(this.makeTree(a))
-      })
-      return res
-    },
-    makeTree(arr) {
-      let arrMap = new Map(arr.map((item) => [item.id, item]))
-      let tree = []
-      for (let i = 0; i < arr.length; i++) {
-        let item = arr[i]
+      const rootNode = new TreeNode('rootNode')
+      function BFS(rootNode) {
+        const visited = [],
+          queue = []
+        let current = rootNode
+        queue.push(current)
+        while (queue.length) {
+          current = queue.shift()
+          visited.push(current)
+          if (current.children.length) queue.push(...current.children)
+        }
+        return visited
+      }
 
-        if (item.pid) {
-          let parentItem = arrMap.get(item.pid)
-
-          if (parentItem) {
-            let { children } = parentItem
-
-            if (children) {
-              parentItem.children.push(item)
-            } else {
-              parentItem.children = [item]
-            }
+      function search(node, nodeValue) {
+        const existingValues = BFS(node)
+        const res = existingValues.filter((el) => el.value === nodeValue)
+        return res[0]
+      }
+      refUsers.forEach((a) => {
+        a.forEach((username, index, current) => {
+          const newNode = new TreeNode(username)
+          if (!search(rootNode, username) && index == 0) {
+            rootNode.children.push(newNode)
+          } else {
+            const parentNode = search(rootNode, current[index - 1])
+            if (parentNode && !search(parentNode, current[index]))
+              parentNode.children.push(newNode)
           }
-        } else {
-          tree.push(item)
-        }
-      }
-      return tree
+        })
+      })
+      return rootNode.children
     },
     async submit() {},
     cancel() {
@@ -152,8 +107,10 @@ export default {
             label="Ref User"
             label-for="Ref User"
           >
-            <template v-for="refUser in params.refUsers">
-              <tree :key="refUser.id" class="item" :items="refUser"></tree>
+            <template v-for="(refUser, index) in params.refUsers">
+              <ul :key="index">
+                <tree class="item" :items="refUser"></tree>
+              </ul>
             </template>
           </b-form-group>
 

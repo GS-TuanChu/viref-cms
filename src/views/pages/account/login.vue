@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      email: "admin@themesbrand.com",
+      email: "tuan@test.com",
       password: "123456",
       submitted: false,
       authError: null,

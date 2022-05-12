@@ -87,7 +87,6 @@ export default {
     // Set the initial number of items
     // this.totalRows = this.items.length;
     this.$parse.getCampaignList().then((dataCampaigns) => {
-      
       this.constructUserObject(dataCampaigns)
     })
   },
@@ -141,27 +140,30 @@ export default {
     <PageHeader :title="title" />
     <div class="row">
       <div class="col-12">
-        <div>
-          <div class="float-end">
-            <form class="d-inline-flex mb-3">
-              <label class="my-1 me-2" for="order-selectinput">Campaings</label>
-              <select class="form-select" id="order-selectinput">
-                <option selected="">All</option>
-                <option value="1">Active</option>
-                <option value="2">Inactive</option>
-              </select>
-            </form>
+        <div class="card">
+          <div class="card-body">
+            <div class="float-end">
+              <form class="d-inline-flex mb-3">
+                <label class="my-1 me-2" for="order-selectinput"
+                  >Campaigns</label
+                >
+                <select class="form-select" id="order-selectinput">
+                  <option selected="">All</option>
+                  <option value="1">Active</option>
+                  <option value="2">Inactive</option>
+                </select>
+              </form>
+            </div>
+            <button
+              @click="addNewCampaign"
+              type="button"
+              class="btn btn-success mb-3"
+            >
+              <i class="mdi mdi-plus me-1"></i> Add New Campaign
+            </button>
           </div>
-          <button
-            @click="addNewCampaign"
-            type="button"
-            class="btn btn-success mb-3"
-          >
-            <i class="mdi mdi-plus me-1"></i> Add New Campaign
-          </button>
-        </div>
-        <div
-          class="
+          <div
+            class="
             table table-centered
             datatable
             dt-responsive
@@ -171,98 +173,101 @@ export default {
             no-footer
             dtr-inline
           "
-        >
-          <div class="row">
-            <div class="col-sm-12 col-md-6">
-              <div id="tickets-table_length" class="dataTables_length">
-                <label class="d-inline-flex align-items-center fw-normal">
-                  Show&nbsp;
-                  <b-form-select
-                    v-model="perPage"
-                    size="sm"
-                    :options="pageOptions"
-                  ></b-form-select
-                  >&nbsp;entries
-                </label>
-              </div>
-            </div>
-            <!-- Search -->
-            <div class="col-sm-12 col-md-6">
-              <div
-                id="tickets-table_filter"
-                class="dataTables_filter text-md-end"
-              >
-                <label class="d-inline-flex align-items-center fw-normal">
-                  Search:
-                  <b-form-input
-                    v-model="filter"
-                    type="search"
-                    placeholder="Search..."
-                    class="form-control form-control-sm ms-2"
-                  ></b-form-input>
-                </label>
-              </div>
-            </div>
-            <!-- End search -->
-          </div>
-          <!-- Table -->
-          <b-table
-            table-class="table table-centered datatable table-card-list"
-            thead-tr-class="bg-transparent"
-            :items="dataCampaigns"
-            :fields="fields"
-            responsive="sm"
-            :per-page="perPage"
-            :current-page="currentPage"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :filter="filter"
-            :filter-included-fields="filterOn"
-            @filtered="onFiltered"
           >
-            <template v-slot:cell(description)="dataCampaigns">
-              {{ dataCampaigns.item.description | truncate }}
-            </template>
-            <template v-slot:cell(action)="dataCampaigns">
-              <ul class="list-inline mb-0">
-                <li
-                  class="list-inline-item"
-                  @click="editCampaign(dataCampaigns.item.id)"
+            <div class="row">
+              <div class="col-sm-12 col-md-6">
+                <div id="tickets-table_length" class="dataTables_length">
+                  <label class="d-inline-flex align-items-center fw-normal">
+                    Show&nbsp;
+                    <b-form-select
+                      v-model="perPage"
+                      size="sm"
+                      :options="pageOptions"
+                    ></b-form-select
+                    >&nbsp;entries
+                  </label>
+                </div>
+              </div>
+              <!-- Search -->
+              <div class="col-sm-12 col-md-6">
+                <div
+                  id="tickets-table_filter"
+                  class="dataTables_filter text-md-end"
                 >
-                  <a
-                    href="javascript:void(0);"
-                    class="px-2 text-primary"
-                    v-b-tooltip.hover
-                    title="Edit"
-                  >
-                    <i class="uil uil-pen font-size-18"></i>
-                  </a>
-                </li>
-                <li class="list-inline-item">
-                  <a
-                    href="javascript:void(0);"
-                    class="px-2 text-danger"
-                    v-b-tooltip.hover
-                    title="Delete"
-                  >
-                    <i class="uil uil-trash-alt font-size-18"></i>
-                  </a>
-                </li>
-              </ul>
-            </template>
-          </b-table>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="dataTables_paginate paging_simple_numbers float-end">
-              <ul class="pagination pagination-rounded">
-                <!-- pagination -->
-                <b-pagination
-                  v-model="currentPage"
-                  :total-rows="rows"
-                  :per-page="perPage"
-                ></b-pagination>
-              </ul>
+                  <label class="d-inline-flex align-items-center fw-normal">
+                    Search:
+                    <b-form-input
+                      v-model="filter"
+                      type="search"
+                      placeholder="Search..."
+                      class="form-control form-control-sm ms-2"
+                    ></b-form-input>
+                  </label>
+                </div>
+              </div>
+              <!-- End search -->
+            </div>
+            <!-- Table -->
+            <div class="table-responsive mb-0">
+              <b-table
+                table-class="table table-centered datatable table-card-list"
+                thead-tr-class="bg-transparent"
+                :items="dataCampaigns"
+                :fields="fields"
+                responsive="sm"
+                :per-page="perPage"
+                :current-page="currentPage"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :filter="filter"
+                :filter-included-fields="filterOn"
+                @filtered="onFiltered"
+              >
+                <template v-slot:cell(description)="dataCampaigns">
+                  {{ dataCampaigns.item.description | truncate }}
+                </template>
+                <template v-slot:cell(action)="dataCampaigns">
+                  <ul class="list-inline mb-0">
+                    <li
+                      class="list-inline-item"
+                      @click="editCampaign(dataCampaigns.item.id)"
+                    >
+                      <a
+                        href="javascript:void(0);"
+                        class="px-2 text-primary"
+                        v-b-tooltip.hover
+                        title="Edit"
+                      >
+                        <i class="uil uil-pen font-size-18"></i>
+                      </a>
+                    </li>
+                    <li class="list-inline-item">
+                      <a
+                        href="javascript:void(0);"
+                        class="px-2 text-danger"
+                        v-b-tooltip.hover
+                        title="Delete"
+                      >
+                        <i class="uil uil-trash-alt font-size-18"></i>
+                      </a>
+                    </li>
+                  </ul>
+                </template>
+              </b-table>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="dataTables_paginate paging_simple_numbers float-end">
+                <ul class="pagination pagination-rounded">
+                  <!-- pagination -->
+                  <b-pagination
+                    v-model="currentPage"
+                    :total-rows="rows"
+                    :per-page="perPage"
+                  ></b-pagination>
+                </ul>
+              </div>
             </div>
           </div>
         </div>

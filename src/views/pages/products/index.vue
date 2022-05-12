@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       title: 'Products',
-      dataProducts: null,
+      dataProducts: [],
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
@@ -107,7 +107,11 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row">
+    <div v-if="dataProducts.length === 0">
+      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
+    </div>
+
+    <div v-else class="row">
       <div class="col-12">
         <div>
           <div class="float-end">

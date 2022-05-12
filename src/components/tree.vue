@@ -1,18 +1,32 @@
 <template>
   <div>
-    <ul>
-      <li v-for="i of items" :key="i.name">
-        <p @click="toggle">
-          <span v-if="!isOpen" class="mdi mdi-chevron-down"></span>
-          <span v-else class="mdi mdi-chevron-up"></span>
-          <span style="margin-left: 3px">{{ i.name }} </span>
-          <span v-if="i.numberOfChildren > 0">({{ i.numberOfChildren }})</span>
-          <span v-else>(No children)</span>
-        </p>
-
-        <tree :items="i.children" v-if="i.children && isOpen" />
-      </li>
-    </ul>
+    <li>
+      <div
+        class="item"
+        :class="{ bold: isFolder }"
+        @click="toggle"
+        @dblclick="makeFolder"
+      >
+        <span
+          v-if="isFolder"
+          class="mdi"
+          :class="{ 'mdi-chevron-up': isOpen, 'mdi-chevron-down': !isOpen }"
+        ></span>
+        <span>
+          {{ items.value || 'Unknown' }}
+          ({{ items.children.length }})
+        </span>
+      </div>
+      <ul v-show="isOpen" v-if="isFolder">
+        <tree
+          class="item"
+          v-for="(child, index) in items.children"
+          :key="index"
+          :items="child"
+          @make-folder="$emit('make-folder', $event)"
+        ></tree>
+      </ul>
+    </li>
   </div>
 </template>
 
@@ -20,28 +34,44 @@
 export default {
   name: 'Tree',
   props: {
-    items: Array,
+    items: Object,
   },
   data() {
     return {
       isOpen: false,
     }
   },
-  computed: {},
-  methods: {
-    toggle: function () {
-      this.isOpen = !this.isOpen
+  computed: {
+    isFolder: function() {
+      return this.items.children && this.items.children.length
     },
-    makeFolder: function () {
-      this.$emit('make-folder', this.item)
-      this.isOpen = true
+  },
+  methods: {
+    toggle: function() {
+      if (this.isFolder) {
+        this.isOpen = !this.isOpen
+      }
+    },
+    makeFolder: function() {
+      if (!this.isFolder) {
+        this.$emit('make-folder', this.item)
+        this.isOpen = true
+      }
     },
   },
 }
 </script>
 
 <style scoped>
-ul {
+ul,
+li {
   list-style-type: none;
+}
+.bold {
+  font-weight: bold;
+}
+
+.item {
+  margin-bottom: 10px;
 }
 </style>

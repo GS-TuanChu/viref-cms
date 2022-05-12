@@ -1,81 +1,91 @@
 <script>
-import Layout from "../../layouts/main";
+import Layout from '../../layouts/main'
 export default {
   page: {
-    title: "User List",
+    title: 'User List',
   },
   components: { Layout },
   data() {
     return {
-      title: "Users",
-      dataUsers: null,
+      title: 'Users',
+      dataUsers: [],
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
-      sortBy: "created-at",
+      sortBy: 'created-at',
       sortDesc: true,
+      filter: null,
+      filterOn: [],
       fields: [
         {
-          key: "check",
-          label: "",
+          key: 'check',
+          label: '',
         },
         {
-          key: "name",
+          key: 'name',
         },
         {
-          key: "email",
+          key: 'email',
         },
         {
-          key: "phone",
+          key: 'phone',
         },
         {
-          key: "role",
+          key: 'role',
         },
-        "action",
+        'action',
       ],
-    };
+    }
+  },
+  computed: {
+    rows() {
+      return this.dataUsers.length
+    },
   },
   mounted() {
     this.$parse.getUserList().then((dataUsers) => {
-      this.constructUserObject(dataUsers);
-    });
+      console.log(dataUsers)
+      this.constructUserObject(dataUsers)
+    })
   },
   methods: {
     constructUserObject(data) {
       this.dataUsers = data.map((dataUser) => {
         return {
           id: dataUser.user.id,
-          username: dataUser.user.get("username"),
-          email: dataUser.user.get("email"),
-          phone: dataUser.user.get("phone"),
+          username: dataUser.user.get('username'),
+          email: dataUser.user.get('email'),
+          phone: dataUser.user.get('phone'),
           role: dataUser.roles,
-        };
-      });
+        }
+      })
     },
     addNewUser() {
       this.$router.push({
-        name: "user-create",
-      });
+        name: 'user-create',
+      })
     },
     editUser(id) {
       this.$router.push({
-        name: "user-edit",
+        name: 'user-edit',
         params: { id: id },
-      });
+      })
     },
   },
-};
+}
 </script>
 
 <template>
   <Layout>
     <h2>Users</h2>
-    <div class="row">
+    <div v-if="dataUsers.length == 0">
+      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
+    </div>
+    <div v-else class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            
             <div class="row mt-4">
               <div class="col-sm-12 col-md-6">
                 <div id="tickets-table_length" class="dataTables_length">
@@ -114,8 +124,10 @@ export default {
                 class="table table-centered table-nowrap"
                 :items="dataUsers"
                 :fields="fields"
+                :filter="filter"
                 responsive="sm"
                 :per-page="perPage"
+                :filter-included-fields="filterOn"
                 :current-page="currentPage"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
@@ -163,7 +175,7 @@ export default {
                 <template v-slot:cell(role)="data">
                   <template v-for="role in data.item.role">
                     <a :key="role.id" href="#" class="text-body">{{
-                      role.get("name")
+                      role.get('name')
                     }}</a>
                   </template>
                 </template>
