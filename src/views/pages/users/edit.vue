@@ -115,11 +115,7 @@ export default {
           </div>
           <div class="row">
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                label="Username"
-                label-for="username"
-              >
+              <b-form-group class="mb-3" label="Username" label-for="username">
                 <b-form-input
                   for="text"
                   v-model="params.username"
@@ -127,22 +123,14 @@ export default {
               </b-form-group>
             </div>
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                label="Email"
-                label-for="email"
-              >
+              <b-form-group class="mb-3" label="Email" label-for="email">
                 <b-form-input for="text" v-model="params.email"></b-form-input>
               </b-form-group>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                label="Phone"
-                label-for="phone"
-              >
+              <b-form-group class="mb-3" label="Phone" label-for="phone">
                 <b-form-input for="text" v-model="params.phone"></b-form-input>
               </b-form-group>
             </div>
@@ -161,11 +149,7 @@ export default {
           </div>
           <div class="row">
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                label="Balance"
-                label-for="balance"
-              >
+              <b-form-group class="mb-3" label="Balance" label-for="balance">
                 <b-form-input
                   for="text"
                   v-model.number="params.balance"
@@ -188,11 +172,7 @@ export default {
           </div>
           <div class="row">
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                label="Amount"
-                label-for="amount"
-              >
+              <b-form-group class="mb-3" label="Amount" label-for="amount">
                 <b-form-input for="text" v-model.number="amount"></b-form-input>
               </b-form-group>
             </div>
@@ -232,4 +212,3 @@ export default {
     </div>
   </Layout>
 </template>
-

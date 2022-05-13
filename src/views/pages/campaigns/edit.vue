@@ -2,9 +2,10 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import Tree from '@/components/tree'
+import Switches from 'vue-switches'
 
 export default {
-  components: { Layout, PageHeader, Tree },
+  components: { Layout, PageHeader, Tree, Switches },
   page: {
     title: 'Campaign Edit',
   },
@@ -12,6 +13,8 @@ export default {
     return {
       title: 'Campaign Edit',
       params: null,
+      sliding: null,
+      small: false,
     }
   },
   created() {
@@ -23,6 +26,12 @@ export default {
     })
   },
   methods: {
+    onSlideStart() {
+      this.sliding = true
+    },
+    onSlideEnd() {
+      this.sliding = false
+    },
     constructUserObject(data) {
       return {
         id: data.id,
@@ -34,7 +43,7 @@ export default {
         commission: data.commission,
         type: data.type,
         product: data.product.media,
-        mine: data.mine,
+        active: data.active,
         startDate: data.startDate,
         endDate: data.endDate,
         refUsers: this.createTreeStructure(data.refUsers),
@@ -85,6 +94,7 @@ export default {
         this.params.cid = this.$route.params.id
         this.params.startDate = new Date(this.params.startDate)
         this.params.endDate = new Date(this.params.endDate)
+        console.log(this.params)
         this.$parse.editCampaign(this.params).then((res) => {
           console.log(res)
         })
@@ -106,7 +116,25 @@ export default {
 
 <template>
   <Layout>
-    <PageHeader :title="title" />
+    <div class="row">
+      <div class="col-md-6">
+        <PageHeader :title="title" />
+      </div>
+      <div class="col-md-6">
+        <b-form-group
+          class="mb-3"
+          id="example text"
+          label="Active"
+          label-for="active"
+        >
+          <switches
+            v-model="params.active"
+            color="warning"
+            class="ms-1"
+          ></switches>
+        </b-form-group>
+      </div>
+    </div>
     <div class="row" v-if="params != null">
       <div class="col-12">
         <form class="form-horizontal" role="form">
@@ -114,14 +142,24 @@ export default {
             <b-form-group
               class="mb-3"
               id="example text"
-              label-cols-sm="2"
-              label-cols-lg="2"
               label="Product"
               label-for="product"
             >
-              <template v-for="(product, index) of params.product">
-                <img :key="index" :src="product" />
-              </template>
+              <div class="col-md-6">
+                <img :src="params.product[0]" alt="" />
+              </div>
+              <!--
+                 -<b-carousel img-width="480" img-height="240" controls>
+                 -  <template v-for="(prod, index) of params.product">
+                 -    <b-carousel-slide
+                 -      :key="index"
+                 -      class="carousel"
+                 -      :img-src="prod"
+                 -    >
+                 -    </b-carousel-slide>
+                 -  </template>
+                 -</b-carousel>
+                 -->
             </b-form-group>
           </div>
           <div class="row">
@@ -223,33 +261,31 @@ export default {
           </div>
 
           <div class="row">
-            <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                id="example text"
-                label="Mine"
-                label-for="mine"
-              >
-                <b-form-input for="text"></b-form-input>
-              </b-form-group>
-            </div>
+            <div class="col-md-6"></div>
           </div>
 
           <div class="row">
             <b-form class="col-md-6">
               <label for="startDate">Start Date:</label>
               <b-form-datepicker
+                id="start-datepicker"
                 v-model="params.startDate"
-                size="sm"
                 locale="en-US"
+                today-button
+                dropleft
+                menu-class="w-100"
+                calendar-width="100%"
               ></b-form-datepicker>
             </b-form>
             <b-form class="col-md-6">
               <label for="endDate">End Date:</label>
               <b-form-datepicker
+                id="end-datepicker"
                 v-model="params.endDate"
-                size="sm"
+                dropleft
                 locale="en-US"
+                menu-class="w-100"
+                calendar-width="100%"
               ></b-form-datepicker>
             </b-form>
           </div>
