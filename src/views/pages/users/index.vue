@@ -1,29 +1,32 @@
 <script>
 import Layout from '../../layouts/main'
+import { userMethods, userComputed } from '@/state/helpers'
+import usersMixin from '@/mixins/users.js'
+
 export default {
   page: {
     title: 'User List',
   },
   components: { Layout },
+  mixins: [usersMixin],
   data() {
     return {
       title: 'Users',
       dataUsers: [],
       totalRows: 1,
       currentPage: 1,
+      prevPage: 1,
       perPage: 10,
-      pageOptions: [10, 25, 50, 100],
       sortBy: 'created-at',
       sortDesc: true,
       filter: null,
       filterOn: [],
       fields: [
         {
-          key: 'check',
-          label: '',
+          key: 'name',
         },
         {
-          key: 'name',
+          key: 'userId',
         },
         {
           key: 'email',
@@ -36,31 +39,52 @@ export default {
         },
         'action',
       ],
+      selected: null,
+      searchResults: [],
+      isSearching: false,
     }
   },
   computed: {
-    rows() {
-      return this.dataUsers.length
+    ...userComputed,
+  },
+  watch: {
+    currentPage(newValue) {
+      this.$router
+        .push({
+          name: 'users',
+          query: { ...this.$route.query, page: newValue },
+        })
+        .catch(() => {})
+    },
+    perPage(newValue) {
+      this.$router
+        .push({
+          name: 'users',
+          query: { ...this.$route.query, perPage: newValue },
+        })
+        .catch(() => {})
+    },
+    filter(newValue) {
+      if (newValue.trim()) {
+        this.isSearching = true
+        setTimeout(async () => {
+          this.searchHandler()
+        }, 1000)
+      }
     },
   },
+  created() {
+    this.currentPage = this.$route.query.page || 1
+    this.perPage = this.$route.query.perPage || 10
+  },
   mounted() {
-    this.$parse.getUserList().then((dataUsers) => {
-      console.log(dataUsers)
-      this.constructUserObject(dataUsers)
+    this.fetchUsers({ limit: 10 }).then(() => {
+      this.dataUsers = this.users
+      this.totalRows = this.dataUsers.length
     })
   },
   methods: {
-    constructUserObject(data) {
-      this.dataUsers = data.map((dataUser) => {
-        return {
-          id: dataUser.user.id,
-          username: dataUser.user.get('username'),
-          email: dataUser.user.get('email'),
-          phone: dataUser.user.get('phone'),
-          role: dataUser.roles,
-        }
-      })
-    },
+    ...userMethods,
     addNewUser() {
       this.$router.push({
         name: 'user-create',
@@ -70,7 +94,30 @@ export default {
       this.$router.push({
         name: 'user-edit',
         params: { id: id },
+        query: { page: this.currentPage, perPage: this.perPage },
       })
+    },
+    onFiltered(filteredItems) {
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
+    },
+    filterHandler(userObj, searchText) {
+      if (userObj[`${this.selected}`]) {
+        return userObj[`${this.selected}`]
+          .toLowerCase()
+          .includes(searchText.toLowerCase())
+      }
+      return false
+    },
+    async searchHandler() {
+      const searchText = this.filter.trim()
+      if (searchText) {
+        this.$parse.searchUser({ searchText }).then((res) => {
+          this.isSearching = false
+          this.searchResults = this.constructUserObject(res)
+        })
+      }
+      this.searchResults.splice(0, this.searchResults.length)
     },
   },
 }
@@ -79,52 +126,71 @@ export default {
 <template>
   <Layout>
     <h2>Users</h2>
-    <div v-if="dataUsers.length == 0">
+    <div v-if="dataUsers.length == 0" class="text-center">
       <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
     <div v-else class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <div class="row mt-4">
-              <div class="col-sm-12 col-md-6">
-                <div id="tickets-table_length" class="dataTables_length">
-                  <label class="d-inline-flex align-items-center">
-                    Show&nbsp;
-                    <b-form-select
-                      v-model="perPage"
-                      size="sm"
-                      :options="pageOptions"
-                    ></b-form-select
-                    >&nbsp;entries
-                  </label>
-                </div>
-              </div>
+            <div class="row mt-4 mb-3">
+              <div class="col-sm-12 col-md-6"></div>
               <!-- Search -->
               <div class="col-sm-12 col-md-6">
-                <div
-                  id="tickets-table_filter"
-                  class="dataTables_filter text-md-end"
-                >
-                  <label class="d-inline-flex align-items-center">
-                    <b-form-input
-                      v-model="filter"
-                      type="search"
-                      placeholder="Search..."
-                      class="form-control rounded bg-light border-0 ms-2"
-                    ></b-form-input>
-                  </label>
-                </div>
+                <b-container>
+                  <b-row>
+                    <b-col></b-col>
+                    <b-col>
+                      <div class="position-relative">
+                        <b-form-input
+                          v-model="filter"
+                          type="search"
+                          placeholder="Search..."
+                          class="form-control rounded bg-light border-0 ms-2"
+                        ></b-form-input>
+                        <div
+                          v-if="filter"
+                          class="search-results form-control card position-absolute p-2 ms-2 mt-1 overflow-auto"
+                        >
+                          <div v-if="isSearching" class="text-center">
+                            <b-spinner
+                              class="m-2"
+                              variant="primary"
+                              role="status"
+                            ></b-spinner>
+                          </div>
+                          <div v-if="!isSearching && searchResults.length">
+                            <template v-for="(item, index) of searchResults">
+                              <div :key="index" class="search-results-item">
+                                <span @click="editUser(item.id)">
+                                  {{ item.username }}
+                                </span>
+                              </div>
+                            </template>
+                          </div>
+                          <div
+                            v-if="!isSearching && !searchResults.length"
+                            class="text-center"
+                          >
+                            No Results found
+                          </div>
+                        </div>
+                      </div>
+                    </b-col>
+                  </b-row>
+                </b-container>
               </div>
               <!-- End search -->
             </div>
             <!-- Table -->
             <div class="table-responsive mb-0">
               <b-table
+                fixed
                 class="table table-centered table-nowrap"
                 :items="dataUsers"
+                @filtered="onFiltered"
                 :fields="fields"
-                :filter="filter"
+                :filter-function="filterHandler"
                 responsive="sm"
                 :per-page="perPage"
                 :filter-included-fields="filterOn"
@@ -132,52 +198,55 @@ export default {
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
               >
-                <template v-slot:cell(check)="data">
-                  <div class="custom-control custom-checkbox">
-                    <input
-                      type="checkbox"
-                      class="custom-control-input"
-                      :id="`contacusercheck${data.item.id}`"
-                    />
-                    <label
-                      class="custom-control-label"
-                      :for="`contacusercheck${data.item.id}`"
-                    ></label>
-                  </div>
-                </template>
                 <template v-slot:cell(name)="data">
-                  <img
-                    v-if="data.item.profile"
-                    :src="data.item.profile"
-                    alt
-                    class="avatar-xs rounded-circle me-2"
-                  />
-                  <div
-                    v-if="!data.item.profile"
-                    class="avatar-xs d-inline-block me-2"
-                  >
+                  <div @click="editUser(data.item.id)" class="user">
+                    <img
+                      v-if="data.item.profile"
+                      :src="data.item.profile"
+                      alt
+                      class="avatar-xs rounded-circle me-2"
+                    />
                     <div
-                      class="
+                      v-if="!data.item.profile"
+                      class="avatar-xs d-inline-block me-2"
+                    >
+                      <div
+                        class="
                         avatar-title
                         bg-soft-primary
                         rounded-circle
                         text-primary
                       "
-                    >
-                      <i class="mdi mdi-account-circle m-0"></i>
+                      >
+                        <i class="mdi mdi-account-circle m-0"></i>
+                      </div>
                     </div>
+                    <a class="text-body">{{ data.item.username }}</a>
                   </div>
-                  <a href="#" class="text-body">{{ data.item.username }}</a>
+                </template>
+                <template v-slot:cell(email)="data">
+                  <a class="text-body">{{
+                    data.item.email || data.item.username
+                  }}</a>
+                </template>
+                <template v-slot:cell(userId)="data">
+                  <a class="text-body">{{ data.item.id }}</a>
                 </template>
                 <template v-slot:cell(phone)="data">
-                  <a href="#" class="text-body">{{ data.item.phone }}</a>
+                  <a class="text-body">{{ data.item.phone }}</a>
                 </template>
                 <template v-slot:cell(role)="data">
-                  <template v-for="role in data.item.role">
-                    <a :key="role.id" href="#" class="text-body">{{
-                      role.get('name')
-                    }}</a>
-                  </template>
+                  <div v-if="!data.item.roles.length">
+                    <span>Guest</span>
+                  </div>
+
+                  <div v-else>
+                    <template v-for="role in data.item.roles">
+                      <span :key="role.id" class="text-body d-block">{{
+                        role
+                      }}</span>
+                    </template>
+                  </div>
                 </template>
                 <template v-slot:cell(action)="data">
                   <ul class="list-inline mb-0">
@@ -205,7 +274,7 @@ export default {
                     <!-- pagination -->
                     <b-pagination
                       v-model="currentPage"
-                      :total-rows="rows"
+                      :total-rows="totalRows"
                       :per-page="perPage"
                     ></b-pagination>
                   </ul>
@@ -218,3 +287,20 @@ export default {
     </div>
   </Layout>
 </template>
+
+<style scoped>
+.user {
+  cursor: pointer;
+}
+.search-results {
+  width: 100%;
+  max-height: 200px;
+}
+.search-results-item {
+  color: grey;
+}
+.search-results-item:hover {
+  color: black;
+  cursor: pointer;
+}
+</style>

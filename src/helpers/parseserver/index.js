@@ -11,6 +11,7 @@ class ParseServer {
 
   async logIn(params) {
     const user = await Parse.User.logIn(params.email, params.password)
+    // const user = await Parse.Cloud.run('logIn', params)
     return user
   }
 
@@ -19,8 +20,11 @@ class ParseServer {
     return result
   }
 
-  async getUserList() {
-    const userData = await Parse.Cloud.run('user:list')
+  async getUserList(params) {
+    let userData = null
+    if (params != undefined)
+      userData = await Parse.Cloud.run('user:list', params)
+    else userData = await Parse.Cloud.run('user:list')
     return userData
   }
 
@@ -31,7 +35,16 @@ class ParseServer {
   }
 
   async editUser(params) {
-    return await Parse.Cloud.run('user:edit', params)
+    let t0 = performance.now()
+    const user = await Parse.Cloud.run('user:edit', params)
+    let t1 = performance.now()
+    console.log(t1 - t0)
+    return user
+  }
+
+  async searchUser(params) {
+    const user = await Parse.Cloud.run('user:search', params)
+    return user
   }
 
   async userRoleEdit(params) {
@@ -79,6 +92,9 @@ class ParseServer {
   async editCampaign(params) {
     return await Parse.Cloud.run('campaign:adminEdit', params)
   }
+  async getTokenTxHistory(params) {
+    return await Parse.Cloud.run('tokenTx:get', params)
+  }
 }
 
 let _parseServer = null
@@ -91,10 +107,10 @@ const initParseServer = () => {
 const getParseServer = () => _parseServer
 
 export default {
-  install: Vue => {
+  install: (Vue) => {
     window.$parse = new ParseServer()
     Vue.prototype.$parse = window.$parse
-  }
+  },
 }
 
 export { initParseServer, getParseServer }

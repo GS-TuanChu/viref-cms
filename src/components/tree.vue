@@ -13,9 +13,13 @@
           :class="{ 'mdi-chevron-up': isOpen, 'mdi-chevron-down': !isOpen }"
         ></span>
         <span>
-          {{ items.value || 'Unknown' }}
+          {{ items.value }}
           ({{ items.children.length }})
         </span>
+        <i
+          class="uil-search-alt search"
+          @click.stop="searchHistory(items.id)"
+        ></i>
       </div>
       <ul v-show="isOpen" v-if="isFolder">
         <tree
@@ -43,7 +47,7 @@ export default {
   },
   computed: {
     isFolder: function() {
-      return this.items.children && this.items.children.length
+      return this.items.children.length
     },
   },
   methods: {
@@ -57,6 +61,18 @@ export default {
         this.$emit('make-folder', this.item)
         this.isOpen = true
       }
+    },
+    searchHistory(id) {
+      const params = {
+        uid: id,
+        cid: this.$route.params.id,
+      }
+      this.$parse.getTokenTxHistory(params).then((res) => {
+        this.$router.push({
+          name: 'history',
+          params: { tabIndex: 1, data: res.results, meta: res.meta },
+        })
+      })
     },
   },
 }
@@ -73,5 +89,9 @@ li {
 
 .item {
   margin-bottom: 10px;
+}
+
+.search:hover {
+  cursor: pointer;
 }
 </style>

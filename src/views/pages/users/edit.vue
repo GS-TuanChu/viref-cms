@@ -2,6 +2,8 @@
 import Swal from 'sweetalert2'
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
+import { userMethods, userComputed } from '@/state/helpers'
+
 export default {
   components: { Layout, PageHeader },
   page: {
@@ -12,39 +14,66 @@ export default {
       title: 'User Edit',
       params: {},
       selected: [],
+      selectedOldValue: [],
       amount: 0,
       isSubmitting: false,
       roles: ['admin', 'server', 'marketing', 'customer_support'],
+      query: {},
+      clonedParams: {},
+      isRoleChanged: false,
+      isDisabled: true,
     }
   },
+
+  computed: {
+    ...userComputed,
+  },
+
   created() {
+    this.query = this.$route.query
+    const userInfo = this.user(this.$route.params.id)
+    if (userInfo) {
+      this.params = userInfo
+      this.watchHandler()
+      if (this.params.roles.length) this.selected = this.params.roles
+      return
+    }
     this.$parse.getUserDetail(this.$route.params.id).then((dataUser) => {
       this.constructUserObject([dataUser])
       this.selected = [...this.params.roles]
+      this.watchHandler()
     })
   },
   methods: {
+    ...userMethods,
     successmsg() {
-      // (Swal.fire('Good job!', 'Data has been saved', 'success'))
-      this.$router.go()
+      Swal.fire('Done!', 'Data has been saved', 'success')
     },
-    position() {
-      Swal.fire({
-        position: 'top-end',
-        icon: 'success',
-        title: 'Your work has been saved',
-        showConfirmButton: false,
-        timer: 1500,
+    watchHandler() {
+      const watchParams = [
+        'params.phone',
+        'params.username',
+        'params.email',
+        'params.bankAccount',
+        'amount',
+        'params.balanceToken',
+        'selected',
+      ]
+      watchParams.forEach((p) => {
+        this.$watch(p, () => {
+          if (p === 'selected') this.isRoleChanged = true
+          this.isDisabled = false
+        })
       })
     },
     constructUserObject(data) {
       this.params = data.map((dataUser) => {
         return {
-          uid: dataUser.user.id,
+          id: dataUser.user.id,
           username: dataUser.user.get('username'),
           email: dataUser.user.get('email'),
           phone: dataUser.user.get('phone'),
-          roles: dataUser.roles.map((r) => r.get('name')),
+          roles: dataUser.roles,
           bankAccount: dataUser.user.get('bankAccount') || '0',
           balance: dataUser.user.get('balance') || 0,
           balanceToken: dataUser.user.get('balanceToken') || 0,
@@ -53,32 +82,42 @@ export default {
     },
     async submit() {
       try {
+        const vm = this
         this.isSubmitting = true
         let param = null
-        const promises = []
-        const removeRoles = this.roles.filter((r) => {
-          return this.selected.indexOf(r) === -1
-        })
-        removeRoles.forEach((r) => {
-          param = {
-            uid: this.params.uid,
-            role: r,
-            operation: 'remove',
-          }
-          promises.push(this.$parse.userRoleEdit(param))
-        })
-        this.selected.forEach((r) => {
-          param = {
-            uid: this.params.uid,
-            role: r,
-            operation: 'add',
-          }
-          promises.push(this.$parse.userRoleEdit(param))
-        })
-        Promise.allSettled(promises).then((res) => console.log(res))
+        if (this.isRoleChanged) {
+          const promises = []
+          const removeRoles = this.roles.filter((r) => {
+            return this.selected.indexOf(r) === -1
+          })
+          removeRoles.forEach((r) => {
+            param = {
+              id: this.params.id,
+              role: r,
+              operation: 'remove',
+            }
+            promises.push(this.$parse.userRoleEdit(param))
+          })
+          this.selected.forEach((r) => {
+            param = {
+              id: this.params.id,
+              role: r,
+              operation: 'add',
+            }
+            promises.push(this.$parse.userRoleEdit(param))
+          })
+          Promise.allSettled(promises)
+        }
         this.params.amount = this.amount
-        this.$parse.editUser(this.params).then((res) => {
-          if (res) {
+        this.params.roles = this.selected
+        this.$parse.editUser(this.params).then(({ id }) => {
+          if (id) {
+            const payload = { id, params: this.params }
+            this.updateUser(payload)
+            this.isSubmitting = false
+            console.log(vm.user())
+            // this.params = this.user(this.$route.params.id)
+            this.$forceUpdate()
             this.successmsg()
           }
         })
@@ -87,7 +126,10 @@ export default {
       }
     },
     cancel() {
-      this.$router.push({ name: 'users' })
+      this.$router.push({
+        name: 'users',
+        query: { page: this.query.page, perPage: this.query.perPage },
+      })
     },
     selectedRoles(event) {
       this.params.roles = []
@@ -100,7 +142,7 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row" v-if="params.uid">
+    <div class="row" v-if="params.id">
       <div class="col-lg-12" id="addproduct-accordion">
         <form class="form-horizontal" role="form">
           <div class="row mb-5">
@@ -196,6 +238,7 @@ export default {
           size="lg"
           variant="primary"
           class="float-right"
+          :disabled="isDisabled"
         >
           Save changes
         </b-button>

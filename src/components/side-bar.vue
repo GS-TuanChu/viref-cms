@@ -147,11 +147,6 @@ export default {
       if (matchingMenuItem) {
         matchingMenuItem.classList.add('active')
         var parent = matchingMenuItem.parentElement
-
-        /**
-         * TODO: This is hard coded way of expading/activating parent menu dropdown and working till level 3.
-         * We should come up with non hard coded approach
-         */
         if (parent) {
           parent.classList.add('mm-active')
           const parent2 = parent.parentElement.closest('ul')
@@ -205,19 +200,19 @@ export default {
     <div class="navbar-brand-box">
       <router-link to="/" class="logo logo-dark">
         <span class="logo-sm">
-          <img src="@/assets/images/logo-sm.png" alt height="22" />
+          <img src="@/assets/images/logo.png" alt height="30" />
         </span>
         <span class="logo-lg">
-          <img src="@/assets/images/logo-dark.png" alt height="20" />
+          <img src="@/assets/images/logo-lg-dark.png" alt height="30"/>
         </span>
       </router-link>
 
       <router-link to="/" class="logo logo-light">
         <span class="logo-sm">
-          <img src="@/assets/images/logo-sm.png" alt height="22" />
+          <img src="@/assets/images/logo-lg-dark.png" alt height="22" />
         </span>
         <span class="logo-lg">
-          <img src="@/assets/images/logo-light.png" alt height="20" />
+          <img src="@/assets/images/logo-lg-dark.png" alt height="50">
         </span>
       </router-link>
     </div>

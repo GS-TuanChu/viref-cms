@@ -107,7 +107,7 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div v-if="dataProducts.length === 0">
+    <div v-if="dataProducts.length === 0" class="text-center">
       <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
 

@@ -13,16 +13,41 @@ export const layoutComputed = {
     leftSidebarType: (state) => state.leftSidebarType,
     layoutWidth: (state) => state.layoutWidth,
     topbar: (state) => state.topbar,
-    loader: (state) => state.loader
-  })
+    loader: (state) => state.loader,
+  }),
 }
 
-export const authMethods = mapActions('auth', ['logIn', 'logOut', 'register', 'resetPassword'])
+export const userComputed = {
+  ...mapGetters('user', ['users', 'user']),
+}
 
-export const layoutMethods = mapActions('layout', ['changeLayoutType', 'changeLayoutWidth', 'changeLeftSidebarType', 'changeTopbar', 'changeLoaderValue'])
+export const authMethods = mapActions('auth', [
+  'logIn',
+  'logOut',
+  'register',
+  'resetPassword',
+])
 
-export const authFackMethods = mapActions('authfack', ['login', 'registeruser', 'logout'])
+export const layoutMethods = mapActions('layout', [
+  'changeLayoutType',
+  'changeLayoutWidth',
+  'changeLeftSidebarType',
+  'changeTopbar',
+  'changeLoaderValue',
+])
 
-export const notificationMethods = mapActions('notification', ['success', 'error', 'clear'])
+export const authFackMethods = mapActions('authfack', [
+  'login',
+  'registeruser',
+  'logout',
+])
 
-export const authParseMethods = mapActions('authparse', ["logIn"])
+export const notificationMethods = mapActions('notification', [
+  'success',
+  'error',
+  'clear',
+])
+
+export const authParseMethods = mapActions('authparse', ['logIn'])
+
+export const userMethods = mapActions('user', ['fetchUsers', 'updateUser'])

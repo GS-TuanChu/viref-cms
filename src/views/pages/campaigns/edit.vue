@@ -22,6 +22,7 @@ export default {
       cid: this.$route.params.id,
     }
     this.$parse.getCampaignDetail(params).then((dataCampaign) => {
+      console.log(dataCampaign)
       this.params = this.constructUserObject(dataCampaign)
     })
   },
@@ -51,9 +52,10 @@ export default {
     },
     createTreeStructure(refUsers) {
       class TreeNode {
-        constructor(value) {
+        constructor(value, id) {
           this.value = value
           this.children = []
+          this.id = id
         }
       }
       const rootNode = new TreeNode('rootNode')
@@ -77,24 +79,23 @@ export default {
       }
       refUsers.forEach((a) => {
         a.forEach((username, index, current) => {
-          const newNode = new TreeNode(username)
+          const newNode = new TreeNode(username.name, username.id)
           if (!search(rootNode, username) && index == 0) {
             rootNode.children.push(newNode)
           } else {
-            const parentNode = search(rootNode, current[index - 1])
-            if (parentNode && !search(parentNode, current[index]))
+            const parentNode = search(rootNode, current[index - 1].name)
+            if (parentNode && !search(parentNode, current[index].name))
               parentNode.children.push(newNode)
           }
         })
       })
-      return rootNode.children
+      return rootNode.children.filter((c) => c.children.length)
     },
     async submit() {
       try {
         this.params.cid = this.$route.params.id
         this.params.startDate = new Date(this.params.startDate)
         this.params.endDate = new Date(this.params.endDate)
-        console.log(this.params)
         this.$parse.editCampaign(this.params).then((res) => {
           console.log(res)
         })
@@ -116,11 +117,11 @@ export default {
 
 <template>
   <Layout>
-    <div class="row">
+  <div class="row">
       <div class="col-md-6">
         <PageHeader :title="title" />
       </div>
-      <div class="col-md-6">
+      <div v-if="params != null" class="col-md-6">
         <b-form-group
           class="mb-3"
           id="example text"

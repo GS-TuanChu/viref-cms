@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       title: 'Campaigns',
-      dataCampaigns: null,
+      dataCampaigns: [],
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
@@ -138,7 +138,7 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row">
+    <div v-if="dataCampaigns.length" class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
@@ -272,6 +272,10 @@ export default {
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-else class="text-center">
+      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
   </Layout>
 </template>
