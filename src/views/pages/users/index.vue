@@ -1,5 +1,6 @@
 <script>
 import Layout from '../../layouts/main'
+import PageHeader from '@/components/page-header'
 import { userMethods, userComputed } from '@/state/helpers'
 import usersMixin from '@/mixins/users.js'
 
@@ -7,7 +8,7 @@ export default {
   page: {
     title: 'User List',
   },
-  components: { Layout },
+  components: { Layout , PageHeader},
   mixins: [usersMixin],
   data() {
     return {
@@ -69,6 +70,7 @@ export default {
         this.isSearching = true
         setTimeout(async () => {
           this.searchHandler()
+          clearTimeout()
         }, 1000)
       }
     },
@@ -125,7 +127,7 @@ export default {
 
 <template>
   <Layout>
-    <h2>Users</h2>
+    <PageHeader :title="title" />
     <div v-if="dataUsers.length == 0" class="text-center">
       <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>

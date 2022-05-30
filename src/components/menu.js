@@ -59,61 +59,63 @@ export const menuItems = [
   //     text: 'menuitems.chat.badge',
   //   },
   // },
-  {
-    id: 621,
-    label: 'menuitems.ecommerce.text',
-    icon: 'uil-store',
-    subItems: [
-      {
-        id: 7,
-        label: 'menuitems.ecommerce.list.products',
-        link: '/ecommerce/products',
-        parentId: 6,
-      },
-      {
-        id: 8,
-        label: 'menuitems.ecommerce.list.productdetail',
-        link: '/ecommerce/product-detail/1',
-        parentId: 6,
-      },
-      {
-        id: 9,
-        label: 'menuitems.ecommerce.list.orders',
-        link: '/ecommerce/orders',
-        parentId: 6,
-      },
-      {
-        id: 10,
-        label: 'menuitems.ecommerce.list.customers',
-        link: '/ecommerce/customers',
-        parentId: 6,
-      },
-      {
-        id: 11,
-        label: 'menuitems.ecommerce.list.cart',
-        link: '/ecommerce/cart',
-        parentId: 6,
-      },
-      {
-        id: 12,
-        label: 'menuitems.ecommerce.list.checkout',
-        link: '/ecommerce/checkout',
-        parentId: 6,
-      },
-      {
-        id: 13,
-        label: 'menuitems.ecommerce.list.shops',
-        link: '/ecommerce/shops',
-        parentId: 6,
-      },
-      {
-        id: 14,
-        label: 'menuitems.ecommerce.list.addproduct',
-        link: '/ecommerce/add-product',
-        parentId: 6,
-      },
-    ],
-  },
+  /*
+   * {
+   *   id: 621,
+   *   label: 'menuitems.ecommerce.text',
+   *   icon: 'uil-store',
+   *   subItems: [
+   *     {
+   *       id: 7,
+   *       label: 'menuitems.ecommerce.list.products',
+   *       link: '/ecommerce/products',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 8,
+   *       label: 'menuitems.ecommerce.list.productdetail',
+   *       link: '/ecommerce/product-detail/1',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 9,
+   *       label: 'menuitems.ecommerce.list.orders',
+   *       link: '/ecommerce/orders',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 10,
+   *       label: 'menuitems.ecommerce.list.customers',
+   *       link: '/ecommerce/customers',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 11,
+   *       label: 'menuitems.ecommerce.list.cart',
+   *       link: '/ecommerce/cart',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 12,
+   *       label: 'menuitems.ecommerce.list.checkout',
+   *       link: '/ecommerce/checkout',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 13,
+   *       label: 'menuitems.ecommerce.list.shops',
+   *       link: '/ecommerce/shops',
+   *       parentId: 6,
+   *     },
+   *     {
+   *       id: 14,
+   *       label: 'menuitems.ecommerce.list.addproduct',
+   *       link: '/ecommerce/add-product',
+   *       parentId: 6,
+   *     },
+   *   ],
+   * },
+   */
   // {
   //   id: 15,
   //   label: 'menuitems.email.text',

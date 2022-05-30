@@ -28,6 +28,8 @@ export default {
       filterOn: [],
       sortBy: 'age',
       sortDesc: false,
+      isSearching: false,
+      searchResults: [],
       fields: [
         {
           key: 'check',
@@ -75,32 +77,35 @@ export default {
   },
   middleware: 'authentication',
   computed: {
-    /**
-     * Total no. of records
-     */
     rows() {
       return 1
-      // return this.orderData.length;
+    },
+  },
+  watch: {
+    filter(newValue) {
+      console.log(newValue)
+      if (newValue.trim()) {
+        this.isSearching = true
+        setTimeout(async () => {
+          this.searchHandler()
+          clearTimeout()
+        }, 1000)
+      }
     },
   },
   mounted() {
-    // Set the initial number of items
-    // this.totalRows = this.items.length;
-    this.$parse.getCampaignList().then((dataCampaigns) => {
-      this.constructUserObject(dataCampaigns.campaigns)
+    this.$parse.getCampaignList().then((res) => {
+      this.dataCampaigns = this.constructUserObject(res.campaigns)
     })
   },
   methods: {
-    /**
-     * Search the table data with search input
-     */
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
       this.totalRows = filteredItems.length
       this.currentPage = 1
     },
     constructUserObject(data) {
-      this.dataCampaigns = data.map((campaign) => {
+      return data.map((campaign) => {
         return {
           id: campaign.id,
           name: campaign.get('name'),
@@ -126,6 +131,16 @@ export default {
         params: { id: id },
       })
     },
+    async searchHandler() {
+      const searchText = this.filter.trim()
+      if (searchText) {
+        this.$parse.searchCampaign({ searchText }).then((res) => {
+          this.isSearching = false
+          this.searchResults = this.constructUserObject(res.campaigns)
+        })
+      }
+      this.searchResults.splice(0, this.searchResults.length)
+    },
   },
   filters: {
     truncate(text) {
@@ -138,29 +153,27 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div v-if="dataCampaigns.length" class="row">
+    <div v-if="dataCampaigns.length == 0" class="text-center">
+      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
+    </div>
+    <div v-else class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <div class="float-end">
-              <form class="d-inline-flex mb-3">
-                <label class="my-1 me-2" for="order-selectinput"
-                  >Campaigns</label
-                >
-                <select class="form-select" id="order-selectinput">
-                  <option selected="">All</option>
-                  <option value="1">Active</option>
-                  <option value="2">Inactive</option>
-                </select>
-              </form>
-            </div>
-            <button
-              @click="addNewCampaign"
-              type="button"
-              class="btn btn-success mb-3"
-            >
-              <i class="mdi mdi-plus me-1"></i> Add New Campaign
-            </button>
+            <!--
+              <div class="float-end">
+                <form class="d-inline-flex mb-3">
+                  <label class="my-1 me-2" for="order-selectinput"
+                    >Campaigns</label
+                  >
+                  <select class="form-select" id="order-selectinput">
+                    <option selected="">All</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                  </select>
+                </form>
+              </div>
+            -->
           </div>
           <div
             class="
@@ -176,40 +189,67 @@ export default {
           >
             <div class="row">
               <div class="col-sm-12 col-md-6">
-                <div id="tickets-table_length" class="dataTables_length">
-                  <label class="d-inline-flex align-items-center fw-normal">
-                    Show&nbsp;
-                    <b-form-select
-                      v-model="perPage"
-                      size="sm"
-                      :options="pageOptions"
-                    ></b-form-select
-                    >&nbsp;entries
-                  </label>
+                <div class="container">
+                  <button
+                    @click="addNewCampaign"
+                    type="button"
+                    class="btn btn-success mb-3"
+                  >
+                    <i class="mdi mdi-plus me-1"></i> Add New Campaign
+                  </button>
                 </div>
               </div>
               <!-- Search -->
               <div class="col-sm-12 col-md-6">
-                <div
-                  id="tickets-table_filter"
-                  class="dataTables_filter text-md-end"
-                >
-                  <label class="d-inline-flex align-items-center fw-normal">
-                    Search:
-                    <b-form-input
-                      v-model="filter"
-                      type="search"
-                      placeholder="Search..."
-                      class="form-control form-control-sm ms-2"
-                    ></b-form-input>
-                  </label>
-                </div>
+                <b-container>
+                  <b-row>
+                    <b-col> </b-col>
+                    <b-col>
+                      <div class="position-relative">
+                        <b-form-input
+                          v-model="filter"
+                          type="search"
+                          placeholder="Search..."
+                          class="form-control rounded bg-light border-0"
+                        ></b-form-input>
+                        <div
+                          v-if="filter"
+                          class="search-results form-control card position-absolute p-2 mt-1 overflow-auto"
+                        >
+                          <div v-if="isSearching" class="text-center">
+                            <b-spinner
+                              class="m-2"
+                              variant="primary"
+                              role="status"
+                            ></b-spinner>
+                          </div>
+                          <div v-if="!isSearching && searchResults.length">
+                            <template v-for="(item, index) of searchResults">
+                              <div :key="index" class="search-results-item">
+                                <span @click="editCampaign(item.id)">
+                                  {{ item.name }}
+                                </span>
+                              </div>
+                            </template>
+                          </div>
+                          <div
+                            v-if="!isSearching && !searchResults.length"
+                            class="text-center"
+                          >
+                            No Results found
+                          </div>
+                        </div>
+                      </div>
+                    </b-col>
+                  </b-row>
+                </b-container>
               </div>
               <!-- End search -->
             </div>
             <!-- Table -->
             <div class="table-responsive mb-0">
               <b-table
+                fixed
                 table-class="table table-centered datatable table-card-list"
                 thead-tr-class="bg-transparent"
                 :items="dataCampaigns"
@@ -219,39 +259,15 @@ export default {
                 :current-page="currentPage"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
-                :filter="filter"
                 :filter-included-fields="filterOn"
                 @filtered="onFiltered"
               >
                 <template v-slot:cell(description)="dataCampaigns">
                   {{ dataCampaigns.item.description | truncate }}
                 </template>
-                <template v-slot:cell(action)="dataCampaigns">
-                  <ul class="list-inline mb-0">
-                    <li
-                      class="list-inline-item"
-                      @click="editCampaign(dataCampaigns.item.id)"
-                    >
-                      <a
-                        href="javascript:void(0);"
-                        class="px-2 text-primary"
-                        v-b-tooltip.hover
-                        title="Edit"
-                      >
-                        <i class="uil uil-pen font-size-18"></i>
-                      </a>
-                    </li>
-                    <li class="list-inline-item">
-                      <a
-                        href="javascript:void(0);"
-                        class="px-2 text-danger"
-                        v-b-tooltip.hover
-                        title="Delete"
-                      >
-                        <i class="uil uil-trash-alt font-size-18"></i>
-                      </a>
-                    </li>
-                  </ul>
+                <template v-slot:cell(action)="">
+                  <i class="uil uil-pen font-size-18 text-primary"></i>
+                  <i class="uil uil-trash-alt font-size-18 text-danger"></i>
                 </template>
               </b-table>
             </div>
@@ -272,10 +288,6 @@ export default {
           </div>
         </div>
       </div>
-    </div>
-
-    <div v-else class="text-center">
-      <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
   </Layout>
 </template>
