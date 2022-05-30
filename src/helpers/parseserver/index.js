@@ -63,6 +63,11 @@ class ParseServer {
   async getCampaignDetail(params) {
     const { campaign } = await Parse.Cloud.run('campaign:detail', params)
     return campaign
+
+  }
+  async searchCampaign(params) {
+    const campaign = await Parse.Cloud.run('campaign:search', params)
+    return campaign
   }
 
   async getProductList() {
