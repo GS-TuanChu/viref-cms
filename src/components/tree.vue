@@ -13,7 +13,7 @@
           :class="{ 'mdi-chevron-up': isOpen, 'mdi-chevron-down': !isOpen }"
         ></span>
         <span>
-          {{ items.value }}
+          {{ items.value }} | {{ items.amount ? items.amount : null }}
           ({{ items.children.length }})
         </span>
         <i
@@ -63,6 +63,7 @@ export default {
       }
     },
     searchHistory(id) {
+      console.log(id)
       const params = {
         uid: id,
         cid: this.$route.params.id,
@@ -89,6 +90,7 @@ li {
 
 .item {
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .search:hover {

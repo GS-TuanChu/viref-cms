@@ -15,14 +15,17 @@ export default {
       params: null,
       sliding: null,
       small: false,
+      buyers: [],
     }
   },
   created() {
     const params = {
       cid: this.$route.params.id,
     }
+    this.$parse.campaignBuyers(params).then((res) => {
+      this.buyers = this.createTreeStructure(res)
+    })
     this.$parse.getCampaignDetail(params).then((dataCampaign) => {
-      console.log(dataCampaign)
       this.params = this.constructUserObject(dataCampaign)
     })
   },
@@ -50,12 +53,13 @@ export default {
         refUsers: this.createTreeStructure(data.refUsers),
       }
     },
-    createTreeStructure(refUsers) {
+    createTreeStructure(data) {
       class TreeNode {
-        constructor(value, id) {
+        constructor(value, id, amount = null) {
           this.value = value
           this.children = []
           this.id = id
+          this.amount = amount
         }
       }
       const rootNode = new TreeNode('rootNode')
@@ -74,22 +78,24 @@ export default {
 
       function search(node, nodeValue) {
         const existingValues = BFS(node)
-        const res = existingValues.filter((el) => el.value === nodeValue)
+        const res = existingValues.filter((el) => el.id === nodeValue)
         return res[0]
       }
-      refUsers.forEach((a) => {
-        a.forEach((username, index, current) => {
-          const newNode = new TreeNode(username.name, username.id)
-          if (!search(rootNode, username) && index == 0) {
+      data.forEach((el) => {
+        el.forEach((obj, index, current) => {
+          const newNode = new TreeNode(obj.name, obj.id, obj.amount)
+          if (index == 0 && !search(rootNode, obj.id)) {
             rootNode.children.push(newNode)
           } else {
-            const parentNode = search(rootNode, current[index - 1].name)
-            if (parentNode && !search(parentNode, current[index].name))
-              parentNode.children.push(newNode)
+            if (index > 0) {
+              const parentNode = search(rootNode, current[index - 1].id)
+              if (parentNode && !search(parentNode, current[index].id))
+                parentNode.children.push(newNode)
+            }
           }
         })
       })
-      return rootNode.children.filter((c) => c.children.length)
+      return rootNode.children.sort((a, b) => (a.id > b.id ) ? 1 : ((a.id < b.id) ? -1 : 0))
     },
     async submit() {
       try {
@@ -117,11 +123,11 @@ export default {
 
 <template>
   <Layout>
-  <div class="row">
+    <div class="row">
       <div class="col-md-6">
         <PageHeader :title="title" />
       </div>
-      <div v-if="params != null" class="col-md-6">
+      <div v-if="params != null && buyers.length" class="col-md-6">
         <b-form-group
           class="mb-3"
           id="example text"
@@ -136,7 +142,7 @@ export default {
         </b-form-group>
       </div>
     </div>
-    <div class="row" v-if="params != null">
+    <div class="row" v-if="params != null && buyers.length">
       <div class="col-12">
         <form class="form-horizontal" role="form">
           <div class="row">
@@ -164,18 +170,34 @@ export default {
             </b-form-group>
           </div>
           <div class="row">
-            <b-form-group
-              class="mb-3"
-              id="example text"
-              label="Ref User"
-              label-for="Ref User"
-            >
-              <template v-for="(refUser, index) in params.refUsers">
-                <ul :key="index">
-                  <tree class="item" :items="refUser"></tree>
-                </ul>
-              </template>
-            </b-form-group>
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Ref User"
+                label-for="Ref User"
+              >
+                <template v-for="(refUser, index) in params.refUsers">
+                  <ul :key="index">
+                    <tree class="item" :items="refUser"></tree>
+                  </ul>
+                </template>
+              </b-form-group>
+            </div>
+            <div class="col-md-6">
+              <b-form-group
+                class="mb-3"
+                id="example text"
+                label="Buyers"
+                label-for="Buyers"
+              >
+                <template v-for="(buyer, index) in buyers">
+                  <ul :key="index">
+                    <tree class="item" :items="buyer"></tree>
+                  </ul>
+                </template>
+              </b-form-group>
+            </div>
           </div>
 
           <div class="row">
