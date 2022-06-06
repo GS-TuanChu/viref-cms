@@ -18,7 +18,7 @@ export const layoutComputed = {
 }
 
 export const userComputed = {
-  ...mapGetters('user', ['users', 'user']),
+  ...mapGetters('user', ['users', 'user', 'total']),
 }
 
 export const authMethods = mapActions('auth', [

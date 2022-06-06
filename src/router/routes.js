@@ -88,6 +88,14 @@ export default [
         },
     },
     {
+        path: '/charts',
+        name: '',
+        meta: {
+            authRequired: true,
+        },
+        component: () => import('../views/pages/charts/apex/index.vue'),
+    },
+    {
         path: '/',
         name: 'home',
         meta: {

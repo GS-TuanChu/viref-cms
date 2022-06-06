@@ -3,9 +3,11 @@ import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import Tree from '@/components/tree'
 import Switches from 'vue-switches'
+import Calendar from '@/components/calendar'
+import Transactions from '@/views/pages/dashboard/transactions'
 
 export default {
-  components: { Layout, PageHeader, Tree, Switches },
+  components: { Layout, PageHeader, Tree, Switches, Calendar, Transactions },
   page: {
     title: 'Campaign Edit',
   },
@@ -16,20 +18,45 @@ export default {
       sliding: null,
       small: false,
       buyers: [],
+      dateRange: [],
+      transactionData: {},
     }
   },
   created() {
     const params = {
       cid: this.$route.params.id,
     }
-    this.$parse.campaignBuyers(params).then((res) => {
-      this.buyers = this.createTreeStructure(res)
-    })
-    this.$parse.getCampaignDetail(params).then((dataCampaign) => {
-      this.params = this.constructUserObject(dataCampaign)
-    })
+    this.getCampaignBuyers(params)
+    this.getCampaignDetail(params)
+    this.getTransactions(params)
   },
   methods: {
+    setDateRange(value) {
+      this.dateRange = value
+    },
+    getDataOnDateRange() {
+      const params = {
+        cid: this.$route.params.id,
+        fromDate: this.dateRange[0],
+        toDate: this.dateRange[1],
+      }
+      this.getTransactions(params)
+    },
+    getCampaignBuyers(params) {
+      this.$parse.campaignBuyers(params).then((res) => {
+        this.buyers = this.createTreeStructure(res)
+      })
+    },
+    getCampaignDetail(params) {
+      this.$parse.getCampaignDetail(params).then((dataCampaign) => {
+        this.params = this.constructUserObject(dataCampaign)
+      })
+    },
+    getTransactions(params) {
+      this.$parse.getTransactions(params).then((res) => {
+        this.transactionData = res
+      })
+    },
     onSlideStart() {
       this.sliding = true
     },
@@ -95,7 +122,9 @@ export default {
           }
         })
       })
-      return rootNode.children.sort((a, b) => (a.id > b.id ) ? 1 : ((a.id < b.id) ? -1 : 0))
+      return rootNode.children.sort((a, b) =>
+        a.id > b.id ? 1 : a.id < b.id ? -1 : 0
+      )
     },
     async submit() {
       try {
@@ -126,20 +155,30 @@ export default {
     <div class="row">
       <div class="col-md-6">
         <PageHeader :title="title" />
+        <span v-if="params != null && buyers.length" class="col-md-6">
+          <b-form-group
+            class="mb-3"
+            id="example text"
+            label="Active"
+            label-for="active"
+          >
+            <switches
+              v-model="params.active"
+              color="warning"
+              class="ms-1"
+            ></switches>
+          </b-form-group>
+        </span>
       </div>
-      <div v-if="params != null && buyers.length" class="col-md-6">
-        <b-form-group
-          class="mb-3"
-          id="example text"
-          label="Active"
-          label-for="active"
-        >
-          <switches
-            v-model="params.active"
-            color="warning"
-            class="ms-1"
-          ></switches>
-        </b-form-group>
+    </div>
+    <div class="row mb-3">
+      <Calendar @date="setDateRange" @submitted="getDataOnDateRange" />
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-2 col-xl-4">
+        <div class="card">
+          <Transactions :data-object="transactionData" />
+        </div>
       </div>
     </div>
     <div class="row" v-if="params != null && buyers.length">

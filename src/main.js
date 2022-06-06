@@ -9,51 +9,19 @@ import VueSlideBar from 'vue-slide-bar'
 import Vuelidate from 'vuelidate'
 import i18n from './i18n'
 import store from '@/state/store'
+import '@/assets/scss/app.scss'
 
 import App from './App.vue'
 // As a plugin
 import VueMask from 'v-mask'
 Vue.config.productionTip = false
 
-import * as VueGoogleMaps from 'vue2-google-maps'
-import Lightbox from 'vue-easy-lightbox'
-
-Vue.use(Lightbox)
-Vue.use(VueGoogleMaps, {
-  load: {
-    key: 'AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE',
-    libraries: 'places',
-  },
-  installComponents: true,
-})
-
-import { initFirebaseBackend } from './helpers/firebase/authUtils'
-
-import { configureFakeBackend } from './helpers/fakebackend/fake-backend'
-
 import { initParseServer } from './helpers/parseserver'
 
 import ParsePlugin from './helpers/parseserver'
 
-const firebaseConfig = {
-  apiKey: process.env.VUE_APP_APIKEY,
-  authDomain: process.env.VUE_APP_AUTHDOMAIN,
-  databaseURL: process.env.VUE_APP_VUE_APP_DATABASEURL,
-  projectId: process.env.VUE_APP_PROJECTId,
-  storageBucket: process.env.VUE_APP_STORAGEBUCKET,
-  messagingSenderId: process.env.VUE_APP_MESSAGINGSENDERID,
-  appId: process.env.VUE_APP_APPId,
-  measurementId: process.env.VUE_APP_MEASUREMENTID,
-}
-
-if (process.env.VUE_APP_DEFAULT_AUTH === 'firebase') {
-  initFirebaseBackend(firebaseConfig)
-} else if (process.env.VUE_APP_DEFAULT_AUTH === 'fakebackend') {
-  configureFakeBackend()
-} else {
-  initParseServer()
-}
-import '@/assets/scss/app.scss'
+// init Parse Server
+initParseServer()
 
 Vue.component('VueSlideBar', VueSlideBar)
 Vue.use(BootstrapVue)

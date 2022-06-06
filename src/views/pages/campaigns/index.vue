@@ -126,6 +126,7 @@ export default {
       this.$router.push({ name: 'campaign-create' })
     },
     editCampaign(id) {
+      console.log('heh')
       this.$router.push({
         name: 'campaign-edit',
         params: { id: id },
@@ -265,9 +266,11 @@ export default {
                 <template v-slot:cell(description)="dataCampaigns">
                   {{ dataCampaigns.item.description | truncate }}
                 </template>
-                <template v-slot:cell(action)="">
-                  <i class="uil uil-pen font-size-18 text-primary"></i>
-                  <i class="uil uil-trash-alt font-size-18 text-danger"></i>
+                <template v-slot:cell(action)="data">
+                  <i
+                    @click="editCampaign(data.item.id)"
+                    class="uil uil-pen font-size-18 text-primary text-center"
+                  ></i>
                 </template>
               </b-table>
             </div>
@@ -290,4 +293,4 @@ export default {
       </div>
     </div>
   </Layout>
-</template>
+ </template>

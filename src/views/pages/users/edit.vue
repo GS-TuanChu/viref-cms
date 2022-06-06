@@ -128,7 +128,7 @@ export default {
     cancel() {
       this.$router.push({
         name: 'users',
-        query: { page: this.query.page, perPage: this.query.perPage },
+        query: { page: this.query.page },
       })
     },
     selectedRoles(event) {
