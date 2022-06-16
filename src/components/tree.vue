@@ -13,7 +13,7 @@
           :class="{ 'mdi-chevron-up': isOpen, 'mdi-chevron-down': !isOpen }"
         ></span>
         <span>
-          {{ items.value }}
+          {{ items.value }} | {{ items.amount ? items.amount : null }}
           ({{ items.children.length }})
         </span>
         <i
@@ -67,11 +67,9 @@ export default {
         uid: id,
         cid: this.$route.params.id,
       }
-      this.$parse.getTokenTxHistory(params).then((res) => {
-        this.$router.push({
-          name: 'history',
-          params: { tabIndex: 1, data: res.results, meta: res.meta },
-        })
+      this.$router.push({
+        name: 'history',
+        params: { tabIndex: 1, params },
       })
     },
   },
@@ -89,6 +87,7 @@ li {
 
 .item {
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .search:hover {

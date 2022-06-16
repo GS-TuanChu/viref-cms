@@ -20,12 +20,19 @@ class ParseServer {
     return result
   }
 
+  async getTotalUser() {
+    return Parse.Cloud.run('user:total')
+  }
   async getUserList(params) {
     let userData = null
     if (params != undefined)
       userData = await Parse.Cloud.run('user:list', params)
     else userData = await Parse.Cloud.run('user:list')
     return userData
+  }
+
+  async getUsers(params) {
+    return Parse.Cloud.run('user:getByRange', params)
   }
 
   async getUserDetail(id) {
@@ -51,6 +58,14 @@ class ParseServer {
     return await Parse.Cloud.run('user:editRole', params)
   }
 
+  async getTotalCampaign() {
+    return Parse.Cloud.run('campaign:total')
+  }
+
+  async getCampaign(params) {
+    return Parse.Cloud.run('campaign:getAll', params)
+  }
+
   async getCampaignList() {
     const campaigns = await Parse.Cloud.run('campaign:list')
     return campaigns
@@ -63,10 +78,15 @@ class ParseServer {
   async getCampaignDetail(params) {
     const { campaign } = await Parse.Cloud.run('campaign:detail', params)
     return campaign
-
   }
+
   async searchCampaign(params) {
     const campaign = await Parse.Cloud.run('campaign:search', params)
+    return campaign
+  }
+
+  async campaignBuyers(params) {
+    const campaign = await Parse.Cloud.run('campaign:buyers', params)
     return campaign
   }
 
@@ -97,8 +117,59 @@ class ParseServer {
   async editCampaign(params) {
     return await Parse.Cloud.run('campaign:adminEdit', params)
   }
+
+  async getTransactions(params) {
+    return Parse.Cloud.run('campaign:getTransactions', params)
+  }
+
+  // TokenTransaction
+  async getTotalTokenTransaction() {
+    return await Parse.Cloud.run('tokenTx:total')
+  }
+
   async getTokenTxHistory(params) {
-    return await Parse.Cloud.run('tokenTx:get', params)
+    return await Parse.Cloud.run('tokenTx:getByRange', params)
+  }
+
+  async getTokenTxHistories(params) {
+    return Parse.Cloud.run('tokenTx:getAll', params)
+  }
+
+  async getAllTokenTransactions() {
+    const query = new Parse.Query('TokenTransaction')
+    query.limit(1000)
+    query.ascending('createdAt')
+    // const fromDate = new Date('Feb-12-2022')
+    // let endDate = new Date('April-12-2022')
+    query.greaterThanOrEqualTo('createdAt', { $relativeTime: '30 days ago' })
+    // query.lessThanOrEqualTo('createdAt', new Date(endDate))
+    const tokenTxs = await query.find()
+    const amounts = []
+    const dates = []
+    const counts = []
+    tokenTxs.forEach((current, index, self) => {
+      const start = current.get('createdAt')
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(start)
+      end.setDate(end.getDate() + 1)
+      const temp = self.filter(
+        (tx) => tx.get('createdAt') >= start && tx.get('createdAt') <= end
+      )
+      self.splice(0, temp.length - 1)
+      const sumAmount = temp.map((tx) => tx.get('amount'))
+      let totalAmount = sumAmount.reduce((prev, curr) => prev + curr, 0)
+
+      const day = start.getDate()
+      const month = start.getMonth() + 1
+      const year = start.getFullYear()
+      const date = day + '/' + month + '/' + year
+      amounts.push(totalAmount)
+      dates.push(date)
+      counts.push(temp.length)
+    })
+    console.log(amounts)
+    console.log(dates)
+    console.log(counts)
   }
 }
 

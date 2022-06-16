@@ -8,7 +8,7 @@ export default {
   page: {
     title: 'User List',
   },
-  components: { Layout , PageHeader},
+  components: { Layout, PageHeader },
   mixins: [usersMixin],
   data() {
     return {
@@ -18,6 +18,7 @@ export default {
       currentPage: 1,
       prevPage: 1,
       perPage: 10,
+      limit: 10,
       sortBy: 'created-at',
       sortDesc: true,
       filter: null,
@@ -43,12 +44,34 @@ export default {
       selected: null,
       searchResults: [],
       isSearching: false,
+      isFetching: false,
+      processPages: [],
     }
   },
   computed: {
     ...userComputed,
   },
   watch: {
+    '$route.query.page': {
+      handler(newValue) {
+        if (this.processPages.indexOf(newValue) != -1) {
+          return
+        }
+        this.isFetching = true
+        this.processPages.push(newValue)
+
+        this.fetchUsers({
+          limit: this.limit,
+          skip: newValue * this.limit - this.limit,
+          page: newValue,
+        }).then(() => {
+          this.isFetching = false
+          this.dataUsers = this.users
+          this.$forceUpdate()
+        })
+      },
+      deep: true,
+    },
     currentPage(newValue) {
       this.$router
         .push({
@@ -77,12 +100,16 @@ export default {
   },
   created() {
     this.currentPage = this.$route.query.page || 1
-    this.perPage = this.$route.query.perPage || 10
+    this.perPage = this.$route.query.perPage || this.perPage
   },
   mounted() {
-    this.fetchUsers({ limit: 10 }).then(() => {
+    this.fetchUsers({
+      limit: this.limit,
+      skip: this.currentPage * this.limit - this.limit,
+      page: this.currentPage,
+    }).then(() => {
       this.dataUsers = this.users
-      this.totalRows = this.dataUsers.length
+      this.totalRows = this.total
     })
   },
   methods: {
@@ -186,17 +213,26 @@ export default {
             </div>
             <!-- Table -->
             <div class="table-responsive mb-0">
+              <div v-if="isFetching" class="text-center">
+                <b-spinner
+                  class="m-2"
+                  variant="primary"
+                  role="status"
+                ></b-spinner>
+              </div>
               <b-table
+                v-if="!isFetching"
                 fixed
+                show-empty
                 class="table table-centered table-nowrap"
-                :items="dataUsers"
+                :items="dataUsers[currentPage - 1]"
                 @filtered="onFiltered"
                 :fields="fields"
                 :filter-function="filterHandler"
                 responsive="sm"
                 :per-page="perPage"
                 :filter-included-fields="filterOn"
-                :current-page="currentPage"
+                :current-page="1"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
               >
@@ -256,7 +292,6 @@ export default {
                       <a
                         href="javascript:void(0);"
                         class="px-2 text-primary"
-                        v-b-tooltip.hover
                         @click="editUser(data.item.id)"
                         title="Edit"
                       >

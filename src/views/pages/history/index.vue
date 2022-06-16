@@ -1,7 +1,7 @@
 <script>
 import Layout from '../../layouts/main'
-import TransactionHistory from '../../../components/transaction-history.vue'
-import TokenTransactionHistory from '../../../components/token-transaction-history.vue'
+import TransactionHistory from '@/components/transaction-history'
+import TokenTransactionHistory from '@/components/token-transaction-history'
 import { userComputed } from '@/state/helpers'
 
 export default {
@@ -16,12 +16,8 @@ export default {
     }
   },
   computed: {
-     ...userComputed 
+    ...userComputed,
   },
-  created(){
-    console.log(this.users)
-  },
-  methods: {},
 }
 </script>
 
@@ -46,7 +42,7 @@ export default {
             </span>
             <span class="d-none d-sm-inline-block">Token Transaction</span>
           </template>
-          <TokenTransactionHistory :data="this.$route.params.data" :meta="this.$route.params.meta" />
+          <TokenTransactionHistory :params="this.$route.params.params" />
         </b-tab>
       </b-tabs>
     </div>

@@ -24,9 +24,9 @@ export default {
       >
         <h4 class="mb-0">{{ title }}</h4>
 
-        <div class="page-title-right">
-          <b-breadcrumb :items="items" class="m-0"></b-breadcrumb>
-        </div>
+        <!-- <div class="page-title-right"> -->
+        <!--   <b-breadcrumb :items="items" class="m-0"></b-breadcrumb> -->
+        <!-- </div> -->
       </div>
     </div>
   </div>
