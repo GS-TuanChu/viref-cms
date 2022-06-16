@@ -7,6 +7,7 @@ import VueApexCharts from 'vue-apexcharts'
 import VueSweetalert2 from 'vue-sweetalert2'
 import VueSlideBar from 'vue-slide-bar'
 import Vuelidate from 'vuelidate'
+
 import i18n from './i18n'
 import store from '@/state/store'
 import '@/assets/scss/app.scss'

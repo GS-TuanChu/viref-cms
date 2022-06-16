@@ -3,7 +3,18 @@ export default {
   name: 'Users',
   data() {
     return {
-      chartOptions: {},
+      chartOptions: {
+        title: {
+          text: 'Users',
+          align: 'center',
+          style: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+            fontFamily: undefined,
+            color: '#333',
+          },
+        },
+      },
       chartData: [],
     }
   },
@@ -55,21 +66,6 @@ export default {
         },
         labels: data.dates,
         width: '200px',
-        /*
-         * tooltip: {
-         *   #<{(| eslint-disable no-unused-vars|)}>#
-         *   custom({ series, seriesIndex, dataPointIndex, w }) {
-         *     return (
-         *       '<div class="p-2">' +
-         *       'amount' +
-         *       ': ' +
-         *       data.amounts[dataPointIndex] +
-         *       '</div>'
-         *     )
-         *   },
-         *   #<{(| eslint-disable no-unused-vars|)}>#
-         * },
-         */
       }
     },
   },

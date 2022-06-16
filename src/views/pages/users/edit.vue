@@ -82,7 +82,6 @@ export default {
     },
     async submit() {
       try {
-        const vm = this
         this.isSubmitting = true
         let param = null
         if (this.isRoleChanged) {
@@ -115,10 +114,7 @@ export default {
             const payload = { id, params: this.params }
             this.updateUser(payload)
             this.isSubmitting = false
-            console.log(vm.user())
-            // this.params = this.user(this.$route.params.id)
-            this.$forceUpdate()
-            this.successmsg()
+            this.$router.go()
           }
         })
       } catch (error) {

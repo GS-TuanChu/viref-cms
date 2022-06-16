@@ -83,7 +83,6 @@ export default {
   },
   watch: {
     filter(newValue) {
-      console.log(newValue)
       if (newValue.trim()) {
         this.isSearching = true
         setTimeout(async () => {
@@ -95,7 +94,7 @@ export default {
   },
   mounted() {
     this.$parse.getCampaignList().then((res) => {
-      this.dataCampaigns = this.constructUserObject(res.campaigns)
+      this.dataCampaigns = this.constructCampaignObject(res.campaigns)
     })
   },
   methods: {
@@ -104,7 +103,7 @@ export default {
       this.totalRows = filteredItems.length
       this.currentPage = 1
     },
-    constructUserObject(data) {
+    constructCampaignObject(data) {
       return data.map((campaign) => {
         return {
           id: campaign.id,
@@ -126,7 +125,6 @@ export default {
       this.$router.push({ name: 'campaign-create' })
     },
     editCampaign(id) {
-      console.log('heh')
       this.$router.push({
         name: 'campaign-edit',
         params: { id: id },
@@ -137,7 +135,7 @@ export default {
       if (searchText) {
         this.$parse.searchCampaign({ searchText }).then((res) => {
           this.isSearching = false
-          this.searchResults = this.constructUserObject(res.campaigns)
+          this.searchResults = this.constructCampaignObject(res.campaigns)
         })
       }
       this.searchResults.splice(0, this.searchResults.length)
@@ -227,7 +225,10 @@ export default {
                           <div v-if="!isSearching && searchResults.length">
                             <template v-for="(item, index) of searchResults">
                               <div :key="index" class="search-results-item">
-                                <span @click="editCampaign(item.id)">
+                                <span
+                                  role="button"
+                                  @click="editCampaign(item.id)"
+                                >
                                   {{ item.name }}
                                 </span>
                               </div>
@@ -267,10 +268,13 @@ export default {
                   {{ dataCampaigns.item.description | truncate }}
                 </template>
                 <template v-slot:cell(action)="data">
-                  <i
-                    @click="editCampaign(data.item.id)"
-                    class="uil uil-pen font-size-18 text-primary text-center"
-                  ></i>
+                  <div class="text-center">
+                    <i
+                      role="button"
+                      @click="editCampaign(data.item.id)"
+                      class="uil uil-pen font-size-18 text-primary"
+                    ></i>
+                  </div>
                 </template>
               </b-table>
             </div>
@@ -293,4 +297,4 @@ export default {
       </div>
     </div>
   </Layout>
- </template>
+</template>

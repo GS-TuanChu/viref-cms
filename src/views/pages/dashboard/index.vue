@@ -2,13 +2,10 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import appConfig from '@/app.config'
-
-// import Stat from '@/components/widgets/stat'
-// import SalesAnalytics from './sales-analytics'
 import TokenTransactions from './token-transactions'
 import UsersAnalytics from './users-analytics'
-// import CampaignAnalytics from './campaign-analytics'
 import Calendar from '@/components/calendar'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 export default {
   page: {
@@ -25,7 +22,6 @@ export default {
     PageHeader,
     TokenTransactions,
     UsersAnalytics,
-    // CampaignAnalytics,
     Calendar,
   },
   data() {
@@ -111,8 +107,7 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <!-- <Stat /> -->
-    <div class="row">
+    <div class="col-md-4">
       <Calendar @date="setDateRange" @submitted="getDataOnDateRange" />
     </div>
     <div class="row mt-3">
@@ -176,19 +171,33 @@ export default {
     <div class="row">
       <div class="col-md-2 col-xl-4">
         <div class="card">
-          <TokenTransactions :data-object="tokenTransactionData" />
+          <div
+            v-if="!Object.keys(tokenTransactionData).length"
+            class="text-center m-2"
+          >
+            <template>
+              <b-skeleton width="25%"></b-skeleton>
+              <b-skeleton width="50%"></b-skeleton>
+              <b-skeleton width="75%"></b-skeleton>
+              <b-skeleton width="100%"></b-skeleton>
+            </template>
+          </div>
+          <TokenTransactions v-else :data-object="tokenTransactionData" />
         </div>
       </div>
       <div class="col-md-2 col-xl-4">
         <div class="card">
-          <UsersAnalytics :data-object="userData" />
+          <div v-if="!Object.keys(userData).length" class="text-center m-2">
+            <template>
+              <b-skeleton width="25%"></b-skeleton>
+              <b-skeleton width="50%"></b-skeleton>
+              <b-skeleton width="75%"></b-skeleton>
+              <b-skeleton width="100%"></b-skeleton>
+            </template>
+          </div>
+          <UsersAnalytics v-else :data-object="userData" />
         </div>
       </div>
-      <!-- <div class="col-md-2 col-xl-4"> -->
-      <!--   <div class="card"> -->
-      <!--     <CampaignAnalytics :data-object="campaignData" /> -->
-      <!--   </div> -->
-      <!-- </div> -->
     </div>
     <div class="row"></div>
   </Layout>

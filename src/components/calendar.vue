@@ -11,30 +11,76 @@ export default {
   data() {
     return {
       dateRange: [fromDate, toDate],
+      isMonth: false,
+      isDay: true,
     }
+  },
+  props: {
+    isShowOption: Boolean,
+    hideFilterBtn: {
+      type: Boolean,
+      default: false,
+    },
   },
   watch: {
     dateRange(newValue) {
       this.$emit('date', newValue)
     },
   },
+  methods: {
+    selectMonth(_, type) {
+      if (type === 'month') {
+        this.isMonth = true
+        this.isDay = false
+      } else {
+        this.isMonth = false
+        this.isDay = true
+      }
+      this.$emit('select', this.isMonth)
+    },
+  },
 }
 </script>
 
 <template>
-  <div>
-    <div class="row">
-      <div class="col-md-2">
-        <date-picker
-          v-model="dateRange"
-          type="date"
-          range
-          placeholder="Select date range"
-        ></date-picker>
-      </div>
-      <div class="col-md-2">
-        <b-button @click="$emit('submitted', dateRange)">Filter</b-button>
-      </div>
-    </div>
-  </div>
+  <b-row align-h="between">
+    <b-col>
+      <date-picker
+        v-model="dateRange"
+        type="date"
+        range
+        placeholder="Select date range"
+      >
+        <template v-if="isShowOption" v-slot:footer="{ emit }">
+          <div style="text-align: left">
+            <button
+              :class="{ active: isDay }"
+              class="mx-btn mx-btn-text"
+              @click="selectMonth(emit, 'day')"
+            >
+              Day
+            </button>
+            <button
+              :class="{ active: isMonth }"
+              class="mx-btn mx-btn-text"
+              @click="selectMonth(emit, 'month')"
+            >
+              Month
+            </button>
+          </div>
+        </template>
+      </date-picker>
+    </b-col>
+    <b-col v-if="!hideFilterBtn">
+      <b-button @click="$emit('submitted', dateRange, isMonth)"
+        >Filter</b-button
+      >
+    </b-col>
+  </b-row>
 </template>
+
+<style scoped>
+.active {
+  color: #1284e7;
+}
+</style>

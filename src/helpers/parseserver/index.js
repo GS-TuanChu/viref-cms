@@ -32,7 +32,7 @@ class ParseServer {
   }
 
   async getUsers(params) {
-    return Parse.Cloud.run('user:getAll', params)
+    return Parse.Cloud.run('user:getByRange', params)
   }
 
   async getUserDetail(id) {
@@ -128,7 +128,7 @@ class ParseServer {
   }
 
   async getTokenTxHistory(params) {
-    return await Parse.Cloud.run('tokenTx:get', params)
+    return await Parse.Cloud.run('tokenTx:getByRange', params)
   }
 
   async getTokenTxHistories(params) {

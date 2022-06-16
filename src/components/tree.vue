@@ -63,16 +63,13 @@ export default {
       }
     },
     searchHistory(id) {
-      console.log(id)
       const params = {
         uid: id,
         cid: this.$route.params.id,
       }
-      this.$parse.getTokenTxHistory(params).then((res) => {
-        this.$router.push({
-          name: 'history',
-          params: { tabIndex: 1, data: res.results, meta: res.meta },
-        })
+      this.$router.push({
+        name: 'history',
+        params: { tabIndex: 1, params },
       })
     },
   },

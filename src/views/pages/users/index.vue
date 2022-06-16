@@ -110,7 +110,6 @@ export default {
     }).then(() => {
       this.dataUsers = this.users
       this.totalRows = this.total
-      console.log(this.dataUsers)
     })
   },
   methods: {

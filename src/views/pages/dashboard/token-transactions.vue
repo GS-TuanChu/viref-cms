@@ -3,7 +3,18 @@ export default {
   name: 'Token-Transaction-Chart',
   data() {
     return {
-      chartOptions: {},
+      chartOptions: {
+        title: {
+          text: 'Token Transactions',
+          align: 'center',
+          style: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+            fontFamily: undefined,
+            color: '#333',
+          },
+        },
+      },
       chartData: [],
     }
   },

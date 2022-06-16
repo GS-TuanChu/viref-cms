@@ -9,13 +9,44 @@ export default {
   },
   props: {
     dataObject: Object,
+    isMonth: Boolean,
   },
   watch: {
+    isMonth: {
+      immediate: true,
+      handler() {
+        if (Object.keys(this.dataObject).length) {
+          if (this.isMonth) {
+            this.chartOptions = {
+              ...this.chartOptions,
+              labels: this.dataObject.months,
+            }
+            const chartData = [
+              {
+                data: this.dataObject.monthCounts,
+              },
+            ]
+            this.chartData = [...chartData]
+          } else {
+            this.chartOptions = {
+              ...this.chartOptions,
+              labels: this.dataObject.dates,
+            }
+            const chartData = [
+              {
+                data: this.dataObject.counts,
+              },
+            ]
+            this.chartData = [...chartData]
+          }
+        }
+      },
+    },
     dataObject(newValue) {
       const data = newValue
       const chartData = [
         {
-          data: data.counts,
+          data: this.isMonth ? data.monthCounts : data.counts,
         },
       ]
       this.chartData = [...chartData]
@@ -53,23 +84,8 @@ export default {
             color: '#333',
           },
         },
-        labels: data.dates,
+        labels: this.isMonth ? data.months : data.dates,
         width: '200px',
-        /*
-         * tooltip: {
-         *   #<{(| eslint-disable no-unused-vars|)}>#
-         *   custom({ series, seriesIndex, dataPointIndex, w }) {
-         *     return (
-         *       '<div class="p-2">' +
-         *       'amount' +
-         *       ': ' +
-         *       data.amounts[dataPointIndex] +
-         *       '</div>'
-         *     )
-         *   },
-         *   #<{(| eslint-disable no-unused-vars|)}>#
-         * },
-         */
       }
     },
   },
