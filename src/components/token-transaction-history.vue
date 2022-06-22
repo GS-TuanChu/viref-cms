@@ -7,6 +7,7 @@ import Calendar from '@/components/calendar'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 export default {
+  name: 'TokenTransactionHistory',
   components: { Chart, Calendar },
   data() {
     return {
@@ -14,12 +15,14 @@ export default {
       campaign: null,
       uid: null,
       cid: null,
+      selectedCurrency: null,
       tokenTxData: [],
       tokenHistoryData: {},
       meta: {},
       searchUsers: [],
       searchCampaigns: [],
       dateRange: [],
+      currencyList: [],
       userSearchModalOpened: false,
       campaignSearchModalOpened: false,
       animated: true,
@@ -29,13 +32,34 @@ export default {
       isSearchingCampaign: false,
       isSelectedUser: false,
       isSelectedCampaign: false,
+      isDisabledCampaignInput: false,
     }
   },
   props: {
     params: Object,
   },
+  computed: {
+    currencyOptions() {
+      const options = []
+      this.currencyList.forEach((currency) => {
+        const option = {
+          value: currency.value,
+          text: currency.name,
+        }
+        options.push(option)
+      })
+      return options
+    },
+  },
   watch: {
+    selectedCurrency(newValue) {
+      this.campaign = null
+      newValue
+        ? (this.isDisabledCampaignInput = true)
+        : (this.isDisabledCampaignInput = false)
+    },
     user(newValue) {
+      if (!newValue) this.uid = null
       if (newValue && !this.isSelectedUser) {
         this.userSearchModalOpened = true
         this.isSearchingUser = true
@@ -45,6 +69,7 @@ export default {
       this.isSelectedUser = false
     },
     campaign(newValue) {
+      if (!newValue) this.cid = null
       if (newValue && !this.isSelectedCampaign) {
         this.campaignSearchModalOpened = true
         this.isSearchingCampaign = true
@@ -53,59 +78,58 @@ export default {
       }
       this.isSelectedCampaign = false
     },
-    isSearchingUser(value) {
-      if (!value) {
+    isSearchingUser(newValue) {
+      if (!newValue) {
         this.searchUserHandler(this.user)
       }
     },
-    isSearchingCampaign(value) {
-      if (!value) {
+    isSearchingCampaign(newValue) {
+      if (!newValue) {
         this.searchCampaignHandler(this.campaign)
       }
     },
   },
   created() {
     this.fetchInitTokenTxHistory()
+    this.getCurrencyList()
   },
   directives: {
     clickOutside: vClickOutside.directive,
   },
   mixins: [usersMixin, campaignsMixin],
   methods: {
+    async getCurrencyList() {
+      this.$parse.getCurrencyList().then((res) =>
+        res.forEach((currency) => {
+          const obj = {
+            value: currency.id,
+            name: currency.get('name'),
+            symbol: currency.get('symbol'),
+          }
+          this.currencyList.push(obj)
+        })
+      )
+    },
     async fetchInitTokenTxHistory() {
       if (this.params) {
-        this.fetchTokenTxHistory(this.params)
+        this.fetchTokenTxHistoryByCampaign(this.params)
       }
     },
     setDateRange(value) {
       this.dateRange = value
-    },
-    fetchTokenTxHistory(params) {
-      this.isSearchingToken = true
-      this.$parse.getTokenTxHistory(params).then((res) => {
-        this.tokenHistoryData = res
-        this.tokenTxData = res.results
-        this.isSearchingToken = false
-        this.meta = res.meta
-        if (this.meta) {
-          this.isSelectedUser = true
-          this.isSelectedCampaign = true
-          this.campaign = this.meta.campaign
-          this.user = this.meta.username
-          this.uid = this.meta.uid
-          this.cid = this.meta.cid
-        }
-      })
     },
     async searchUserHandler(text) {
       const searchText = text.trim()
       if (searchText) {
         this.isSearching = true
         this.userSearchModalOpened = true
-        this.$parse.searchUser({ searchText }).then((res) => {
-          this.searchUsers = this.constructUserObject(res)
-          this.isSearching = false
-        })
+        this.$parse
+          .searchUser({ searchText })
+          .then((res) => {
+            this.searchUsers = this.constructUserObject(res)
+            this.isSearching = false
+          })
+          .catch((error) => console.log(error))
       } else this.userSearchModalOpened = false
       this.searchUsers.splice(0, this.searchUsers.length)
     },
@@ -152,14 +176,60 @@ export default {
       }
     },
     async searchHandler() {
-      if (!this.uid || !this.cid) return
-      const params = {
-        uid: this.uid,
-        cid: this.cid,
-        fromDate: this.dateRange[0],
-        toDate: this.dateRange[1],
+      if (!this.selectedCurrency) {
+        if (!this.uid || !this.cid) return
+        const params = {
+          uid: this.uid,
+          cid: this.cid,
+          fromDate: this.dateRange[0],
+          toDate: this.dateRange[1],
+        }
+        this.fetchTokenTxHistoryByCampaign(params)
+      } else {
+        if (!this.uid) return
+        this.isSearchingToken = true
+        const params = {
+          uid: this.uid,
+          currencyId: this.selectedCurrency,
+          fromDate: this.dateRange[0],
+          toDate: this.dateRange[1],
+        }
+        this.getTokenTxHistory(params)
       }
-      this.fetchTokenTxHistory(params)
+    },
+    fetchTokenTxHistoryByCampaign(params) {
+      this.isSearchingToken = true
+      this.isDisabledCampaignInput = true
+      this.$parse
+        .getTokenTxHistoryByCampaign(params)
+        .then((res) => {
+          this.tokenHistoryData = res
+          this.tokenTxData = res.results
+          this.isSearchingToken = false
+          this.isDisabledCampaignInput = false
+          this.meta = res.meta
+          if (this.meta) {
+            this.isSelectedUser = true
+            this.isSelectedCampaign = true
+            this.campaign = this.meta.campaign
+            this.user = this.meta.username
+            this.uid = this.meta.uid
+            this.cid = this.meta.cid
+          }
+        })
+        .catch((error) => console.log(error))
+    },
+    getTokenTxHistory(params) {
+      this.$parse
+        .getTokenTxHistory(params)
+        .then((res) => {
+          this.isSearchingToken = false
+          this.tokenHistoryData = res
+        })
+        .catch((error) => {
+          this.isSearchingToken = false
+          console.log(error)
+        })
     },
   },
 }
@@ -177,6 +247,25 @@ export default {
       >
         <div class="position-relative col-md-3">
           <Calendar @date="setDateRange" :hide-filter-btn="true" />
+        </div>
+      </b-form-group>
+    </div>
+    <div class="row">
+      <b-form-group
+        class="mb-3"
+        label-cols-sm="2"
+        label-cols-lg="1"
+        label="Currency"
+        label-for="currency"
+      >
+        <div class="position-relative col-md-3">
+          <b-form-select v-model="selectedCurrency" :options="currencyOptions">
+            <template #first>
+              <b-form-select-option :value="null"
+                >-- Select a currency --</b-form-select-option
+              >
+            </template>
+          </b-form-select>
         </div>
       </b-form-group>
     </div>
@@ -247,7 +336,7 @@ export default {
             v-model="campaign"
             placeholder="Enter campaign"
             @click="toggle"
-            :disabled="isSearchingToken"
+            :disabled="isDisabledCampaignInput"
           ></b-form-input>
           <div
             v-if="campaignSearchModalOpened"

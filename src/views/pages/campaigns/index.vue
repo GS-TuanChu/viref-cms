@@ -32,12 +32,13 @@ export default {
       searchResults: [],
       fields: [
         {
-          key: 'check',
-          label: '',
+          key: 'id',
         },
-
         {
           key: 'name',
+        },
+        {
+          key: 'currency',
         },
         {
           key: 'description',
@@ -108,6 +109,7 @@ export default {
         return {
           id: campaign.id,
           name: campaign.get('name'),
+          currency: campaign.get('currency').get("name"),
           description: campaign.get('description'),
           website: campaign.get('website'),
           network: campaign.get('network'),
