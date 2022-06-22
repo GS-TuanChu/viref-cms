@@ -204,7 +204,7 @@ export default {
               label-for="product"
             >
               <div class="col-md-6">
-                <img :src="params.product[0]" alt="" />
+                <img :src="params.product[0]" alt="product" width="600" height="auto" />
               </div>
             </b-form-group>
           </div>

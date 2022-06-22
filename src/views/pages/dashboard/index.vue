@@ -87,7 +87,7 @@ export default {
     },
     getTokenTransactions(fromDate = null, toDate = null) {
       this.$parse
-        .getTokenTxHistories({
+        .getTokenTxHistory({
           fromDate,
           toDate,
         })

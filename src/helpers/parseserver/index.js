@@ -123,53 +123,42 @@ class ParseServer {
   }
 
   // TokenTransaction
+  /**
+   * Returns the total token transactions
+   *
+   * @returns {number}
+   */
   async getTotalTokenTransaction() {
     return await Parse.Cloud.run('tokenTx:total')
   }
 
+  /**
+   * Returns token transaction history of a user in a specific campaign
+   *
+   * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
+   * @returns {TokenTransaction[]}
+   */
+  async getTokenTxHistoryByCampaign(params) {
+    return await Parse.Cloud.run('tokenTx:getByCampaign', params)
+  }
+
+  /**
+   * Returns token transaction history of a user
+   *
+   * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
+   * @returns {TokenTransaction[]}
+   */
   async getTokenTxHistory(params) {
-    return await Parse.Cloud.run('tokenTx:getByRange', params)
+    return Parse.Cloud.run('tokenTx:getHistory', params)
   }
 
-  async getTokenTxHistories(params) {
-    return Parse.Cloud.run('tokenTx:getAll', params)
-  }
-
-  async getAllTokenTransactions() {
-    const query = new Parse.Query('TokenTransaction')
-    query.limit(1000)
-    query.ascending('createdAt')
-    // const fromDate = new Date('Feb-12-2022')
-    // let endDate = new Date('April-12-2022')
-    query.greaterThanOrEqualTo('createdAt', { $relativeTime: '30 days ago' })
-    // query.lessThanOrEqualTo('createdAt', new Date(endDate))
-    const tokenTxs = await query.find()
-    const amounts = []
-    const dates = []
-    const counts = []
-    tokenTxs.forEach((current, index, self) => {
-      const start = current.get('createdAt')
-      start.setHours(0, 0, 0, 0)
-      const end = new Date(start)
-      end.setDate(end.getDate() + 1)
-      const temp = self.filter(
-        (tx) => tx.get('createdAt') >= start && tx.get('createdAt') <= end
-      )
-      self.splice(0, temp.length - 1)
-      const sumAmount = temp.map((tx) => tx.get('amount'))
-      let totalAmount = sumAmount.reduce((prev, curr) => prev + curr, 0)
-
-      const day = start.getDate()
-      const month = start.getMonth() + 1
-      const year = start.getFullYear()
-      const date = day + '/' + month + '/' + year
-      amounts.push(totalAmount)
-      dates.push(date)
-      counts.push(temp.length)
-    })
-    console.log(amounts)
-    console.log(dates)
-    console.log(counts)
+  /**
+   * Returns a list of currencies
+   *
+   * @returns {Currency[]}
+   */
+  async getCurrencyList() {
+    return Parse.Cloud.run('currency:list')
   }
 }
 
