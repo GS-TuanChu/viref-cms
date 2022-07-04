@@ -18,6 +18,15 @@ export default {
       selectedCurrency: null,
       tokenTxData: [],
       tokenHistoryData: {},
+      tokenTxHistoryDetails: [],
+      fields: [
+        'tokenTransactionId',
+        'campaign',
+        'campaignOwner',
+        'contact',
+        'amount',
+        'transactionDate',
+      ],
       meta: {},
       searchUsers: [],
       searchCampaigns: [],
@@ -43,12 +52,21 @@ export default {
       const options = []
       this.currencyList.forEach((currency) => {
         const option = {
-          value: currency.value,
+          value: currency.id,
           text: currency.name,
         }
         options.push(option)
       })
       return options
+    },
+    isBtnDisabled() {
+      if (this.selectedCurrency) {
+        if (!this.uid) return true
+      } else {
+        if (!this.uid || !this.cid) return true
+      }
+      if (this.isSearchingToken) return true
+      return false
     },
   },
   watch: {
@@ -92,6 +110,9 @@ export default {
   created() {
     this.fetchInitTokenTxHistory()
     this.getCurrencyList()
+    this.$parse
+      .convertVREFtoUSDC({ value: 2, currency: 'vref' })
+      .then((res) => console.log(res))
   },
   directives: {
     clickOutside: vClickOutside.directive,
@@ -101,12 +122,7 @@ export default {
     async getCurrencyList() {
       this.$parse.getCurrencyList().then((res) =>
         res.forEach((currency) => {
-          const obj = {
-            value: currency.id,
-            name: currency.get('name'),
-            symbol: currency.get('symbol'),
-          }
-          this.currencyList.push(obj)
+          this.currencyList.push(currency)
         })
       )
     },
@@ -159,8 +175,11 @@ export default {
       this.campaignSearchModalOpened = false
       this.userSearchModalOpened = false
     },
-    onClickOutside() {
+    onClickOutsideUserInput() {
       this.userSearchModalOpened = false
+      this.isSearching = false
+    },
+    onClickOutsideCampaignInput() {
       this.campaignSearchModalOpened = false
       this.isSearching = false
     },
@@ -207,6 +226,7 @@ export default {
           this.tokenTxData = res.results
           this.isSearchingToken = false
           this.isDisabledCampaignInput = false
+          this.tokenTxHistoryDetails = res.details
           this.meta = res.meta
           if (this.meta) {
             this.isSelectedUser = true
@@ -225,6 +245,7 @@ export default {
         .then((res) => {
           this.isSearchingToken = false
           this.tokenHistoryData = res
+          this.tokenTxHistoryDetails = res.details
         })
         .catch((error) => {
           this.isSearchingToken = false
@@ -236,7 +257,7 @@ export default {
 </script>
 
 <template>
-  <div v-click-outside="onClickOutside">
+  <div>
     <div class="row">
       <b-form-group
         class="mb-3"
@@ -280,6 +301,8 @@ export default {
       >
         <div class="position-relative col-md-3">
           <b-form-input
+            autocomplete="off"
+            v-click-outside="onClickOutsideUserInput"
             for="text"
             title="user"
             type="search"
@@ -330,6 +353,8 @@ export default {
       >
         <div class="position-relative col-md-3">
           <b-form-input
+            autocomplete="off"
+            v-click-outside="onClickOutsideCampaignInput"
             for="text"
             title="campaign"
             type="search"
@@ -373,7 +398,7 @@ export default {
         <b-button
           @click="searchHandler"
           variant="primary"
-          :disabled="isSearchingToken"
+          :disabled="isBtnDisabled"
           >Search</b-button
         >
       </div>
@@ -387,6 +412,17 @@ export default {
       </template>
       <div v-show="!isSearchingToken && Object.keys(tokenHistoryData).length">
         <Chart class="card" :data-object="tokenHistoryData" />
+        <br />
+        <div class="card">
+          <b-table striped :items="tokenTxHistoryDetails" :fields="fields">
+            <template #cell(tokenTransactionId)="data">
+              {{ data.item.id }}
+            </template>
+            <template #cell(transactionDate)="data">
+              {{ data.item.date }}
+            </template>
+          </b-table>
+        </div>
       </div>
     </div>
   </div>
