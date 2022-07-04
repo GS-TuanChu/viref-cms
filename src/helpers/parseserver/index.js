@@ -132,33 +132,55 @@ class ParseServer {
     return await Parse.Cloud.run('tokenTx:total')
   }
 
+  /*
+   * async transactionMine() {
+   *   return Parse.Cloud.run('transaction:mine', { currencyId: "QRPKGt2GL3" }).then(res=>console.log(res))
+   * }
+   */
+
   /**
+   * @function getTokenTxHistoryByCampaign
    * Returns token transaction history of a user in a specific campaign
    *
    * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
-   * @returns {TokenTransaction[]}
+   * @returns  {Object}
    */
   async getTokenTxHistoryByCampaign(params) {
     return await Parse.Cloud.run('tokenTx:getByCampaign', params)
   }
 
   /**
+   * @function getTokenTxHistory
    * Returns token transaction history of a user
    *
    * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
-   * @returns {TokenTransaction[]}
+   * @returns {Object}
    */
   async getTokenTxHistory(params) {
     return Parse.Cloud.run('tokenTx:getHistory', params)
   }
 
   /**
+   * @function getCurrencyList
    * Returns a list of currencies
-   *
+   * typedef {object} Currency
+   * @property {string} id
+   * @property {string} name
+   * @property {string} symbol
    * @returns {Currency[]}
    */
   async getCurrencyList() {
     return Parse.Cloud.run('currency:list')
+  }
+  /**
+   * @function convertVREFtoUSDC
+   * Returns the converted amount from VREF to USDC
+   * @param {{ value: number, currency: string }} params
+   *
+   * @returns {number}
+   */
+  async convertVREFtoUSDC(params) {
+    return Parse.Cloud.run('exchange:convert', params)
   }
 }
 

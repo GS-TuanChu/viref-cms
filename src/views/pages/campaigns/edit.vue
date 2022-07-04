@@ -146,11 +146,6 @@ export default {
       this.isFilterMonth = option
     },
   },
-  filters: {
-    formatTime(time) {
-      return new Date(time).toDateString('en-gb')
-    },
-  },
 }
 </script>
 
