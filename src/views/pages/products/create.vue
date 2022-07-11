@@ -11,21 +11,44 @@ export default {
     return {
       title: 'Product Create',
       params: {
-        name: null,
-        price: null,
-        description: null,
-        contact: null,
+        name: '',
+        price: 0,
+        description: '',
+        category: '',
+        contact: '',
+        media: [],
       },
+      isSubmitting: false,
     }
+  },
+  watch: {
+    'params.media': {
+      deep: true,
+      handler(newVal) {
+        newVal.forEach(async (n) => {
+          this.$parse.fileHandler(n.name, n)
+        })
+      },
+    },
+  },
+  mounted() {
+    this.getCategoryList()
   },
   methods: {
     async submit() {
+      this.isSubmitting = true
       this.$parse.createProduct(this.params).then(() => {
-        this.$router.push({ name: 'products' })
+        this.isSubmitting = false
+        this.$router.push({ name: 'products' }).catch((err) => console.log(err))
       })
     },
     cancel() {
       this.$router.push({ name: 'products' })
+    },
+    getCategoryList() {
+      this.$parse.getCategoryList((res) => {
+        console.log(res)
+      })
     },
   },
 }
@@ -49,16 +72,12 @@ export default {
           </b-form-group>
           <b-form-group
             class="mb-3"
-            id="example text"
             label-cols-sm="2"
             label-cols-lg="2"
-            label="Description"
-            label-for="description"
+            label="Category"
+            label-for="category"
           >
-            <b-form-input
-              for="text"
-              v-model="params.description"
-            ></b-form-input>
+            <b-form-input for="text" v-model="params.category"></b-form-input>
           </b-form-group>
           <b-form-group
             class="mb-3"
@@ -83,9 +102,36 @@ export default {
               v-model.number="params.price"
             ></b-form-input>
           </b-form-group>
+          <b-form-group
+            class="mb-3"
+            label-cols-sm="2"
+            label-cols-lg="2"
+            label="Description"
+            label-for="description"
+          >
+            <b-form-textarea
+              rows="10"
+              for="text"
+              v-model="params.description"
+            ></b-form-textarea>
+          </b-form-group>
+          <b-form-group
+            class="mb-3"
+            label-cols-sm="2"
+            label-cols-lg="2"
+            label="Image"
+            label-for="image"
+          >
+            <b-form-file
+              multiple
+              v-model="params.media"
+              id="form-image"
+              accept="image/*"
+            ></b-form-file>
+          </b-form-group>
         </form>
       </div>
-      <div class="button-items text-center">
+      <div v-if="!isSubmitting" class="button-items text-center">
         <b-button
           @click="submit"
           size="lg"
@@ -96,6 +142,9 @@ export default {
         <b-button @click="cancel" size="lg" variant="secondary"
           >Cancel</b-button
         >
+      </div>
+      <div v-else class="text-center">
+        <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
       </div>
     </div>
   </Layout>

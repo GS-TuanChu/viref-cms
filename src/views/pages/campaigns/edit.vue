@@ -15,7 +15,7 @@ export default {
   data() {
     return {
       title: 'Campaign Edit',
-      params: null,
+      params: {},
       sliding: null,
       small: false,
       buyers: [],
@@ -23,7 +23,22 @@ export default {
       transactionData: {},
       isLoading: false,
       isFilterMonth: false,
+      isSubmitting: false,
     }
+  },
+  computed: {
+    amountLabel() {
+      if (Object.keys(this.params).length) {
+        return `Amount (${this.params.currency.name})`
+      }
+      return 'Amount'
+    },
+    commissionLabel() {
+      if (Object.keys(this.params).length) {
+        return `Commission (${this.params.currency.name})`
+      }
+      return 'Commission'
+    },
   },
   created() {
     const params = {
@@ -83,6 +98,7 @@ export default {
         active: data.active,
         startDate: data.startDate,
         endDate: data.endDate,
+        currency: data.currency,
       }
     },
     createTreeStructure(data) {
@@ -131,10 +147,11 @@ export default {
     },
     async submit() {
       try {
+        this.isSubmitting = true
         this.params.cid = this.$route.params.id
         this.params.startDate = new Date(this.params.startDate)
         this.params.endDate = new Date(this.params.endDate)
-        this.$parse.editCampaign(this.params)
+        await this.editCampaign(this.params)
       } catch (error) {
         console.log(error)
       }
@@ -144,6 +161,10 @@ export default {
     },
     selectOptionHandler(option) {
       this.isFilterMonth = option
+    },
+    async editCampaign(params) {
+      await this.$parse.editCampaign(params)
+      this.isSubmitting = false
     },
   },
 }
@@ -188,7 +209,7 @@ export default {
         </div>
       </div>
     </div>
-    <div class="row" v-if="params != null">
+    <div class="row" v-if="Object.keys(params).length > 0 && params.currency">
       <div class="col-12">
         <form class="form-horizontal" role="form">
           <div class="row">
@@ -263,8 +284,7 @@ export default {
             <div class="col-md-6">
               <b-form-group
                 class="mb-3"
-                id="example text"
-                label="Amount"
+                :label="amountLabel"
                 label-for="amount"
               >
                 <b-form-input
@@ -276,8 +296,7 @@ export default {
             <div class="col-md-6">
               <b-form-group
                 class="mb-3"
-                id="example text"
-                label="Commission"
+                :label="commissionLabel"
                 label-for="commission"
               >
                 <b-form-input
@@ -288,10 +307,9 @@ export default {
             </div>
           </div>
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-3">
               <b-form-group
                 class="mb-3"
-                id="example text"
                 label="Network"
                 label-for="network"
               >
@@ -301,10 +319,9 @@ export default {
                 ></b-form-input>
               </b-form-group>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <b-form-group
                 class="mb-3"
-                id="example text"
                 label="Type"
                 label-for="type"
               >
@@ -314,14 +331,7 @@ export default {
                 ></b-form-input>
               </b-form-group>
             </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6"></div>
-          </div>
-
-          <div class="row">
-            <b-form class="col-md-6">
+            <b-form class="col-md-3">
               <label for="startDate">Start Date:</label>
               <b-form-datepicker
                 id="start-datepicker"
@@ -333,7 +343,7 @@ export default {
                 calendar-width="100%"
               ></b-form-datepicker>
             </b-form>
-            <b-form class="col-md-6">
+            <b-form class="col-md-3">
               <label for="endDate">End Date:</label>
               <b-form-datepicker
                 id="end-datepicker"
@@ -345,12 +355,10 @@ export default {
               ></b-form-datepicker>
             </b-form>
           </div>
-
           <div class="row">
             <div class="col-md-12">
               <b-form-group
                 class="mb-3"
-                id="example text"
                 label="Description"
                 label-for="description"
               >
@@ -364,7 +372,7 @@ export default {
           </div>
         </form>
       </div>
-      <div class="button-items text-center">
+      <div v-if="!isSubmitting" class="button-items text-center mb-3">
         <b-button
           @click="submit"
           size="lg"
@@ -375,6 +383,9 @@ export default {
         <b-button @click="cancel" size="lg" variant="secondary"
           >Cancel</b-button
         >
+      </div>
+      <div v-else class="text-center">
+        <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
       </div>
     </div>
     <div v-else class="text-center">

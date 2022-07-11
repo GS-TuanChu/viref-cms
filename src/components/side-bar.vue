@@ -133,13 +133,14 @@ export default {
       const paths = []
 
       for (var i = 0; i < links.length; i++) {
-        paths.push(links[i]['pathname'])
+        paths.push(links[i]['pathname'].split('/')[1])
       }
       var itemIndex = paths.indexOf(window.location.pathname)
       if (itemIndex === -1) {
-        const strIndex = window.location.pathname.lastIndexOf('/')
-        const item = window.location.pathname.substr(0, strIndex).toString()
-        matchingMenuItem = links[paths.indexOf(item)]
+        // const strIndex = window.location.pathname.lastIndexOf('/')
+        // const item = window.location.pathname.substr(0, strIndex).toString()
+        const item = window.location.pathname.split('/')
+        matchingMenuItem = links[paths.indexOf(item[1])]
       } else {
         matchingMenuItem = links[itemIndex]
       }
@@ -181,8 +182,9 @@ export default {
     onRoutechange() {
       setTimeout(() => {
         if (document.getElementsByClassName('mm-active').length > 0) {
-          const currentPosition =
-            document.getElementsByClassName('mm-active')[0].offsetTop
+          const currentPosition = document.getElementsByClassName(
+            'mm-active'
+          )[0].offsetTop
           if (currentPosition > 500)
             this.$refs.currentMenu.SimpleBar.getScrollElement().scrollTop =
               currentPosition + 300
@@ -212,7 +214,7 @@ export default {
           <img src="@/assets/images/logo-lg-dark.png" alt height="22" />
         </span>
         <span class="logo-lg">
-          <img src="@/assets/images/logo-lg-dark.png" alt height="50">
+          <img src="@/assets/images/logo-lg-dark.png" alt height="50" />
         </span>
       </router-link>
     </div>
