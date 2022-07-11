@@ -2,7 +2,6 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import appConfig from '@/app.config'
-import dateMixin from '@/mixins/date.js'
 
 export default {
   components: { Layout, PageHeader },
@@ -15,7 +14,6 @@ export default {
       },
     ],
   },
-  mixins: [dateMixin],
   data() {
     return {
       title: 'Campaigns',
@@ -41,9 +39,6 @@ export default {
           key: 'currency',
         },
         {
-          key: 'description',
-        },
-        {
           key: 'website',
         },
         {
@@ -56,13 +51,7 @@ export default {
           key: 'commission',
         },
         {
-          key: 'type',
-        },
-        {
           key: 'product',
-        },
-        {
-          key: 'mine',
         },
         {
           key: 'startDate',
@@ -93,9 +82,9 @@ export default {
       }
     },
   },
-  mounted() {
+  created() {
     this.$parse.getCampaignList().then((res) => {
-      this.dataCampaigns = this.constructCampaignObject(res.campaigns)
+      this.dataCampaigns = res
     })
   },
   methods: {
@@ -109,15 +98,14 @@ export default {
         return {
           id: campaign.id,
           name: campaign.get('name'),
-          currency: campaign.get('currency').get("name"),
+          currency: campaign.get('currency').get('name'),
           description: campaign.get('description'),
           website: campaign.get('website'),
-          network: campaign.get('network'),
+          network: campaign.get('rootNode').id,
           amount: campaign.get('amount'),
           commission: campaign.get('commission'),
           type: campaign.get('type'),
           product: campaign.get('product').get('name'),
-          mine: campaign.get('mine'),
           startDate: this.formatDate(campaign.get('startDate')),
           endDate: this.formatDate(campaign.get('endDate')),
         }
@@ -160,22 +148,6 @@ export default {
     <div v-else class="row">
       <div class="col-12">
         <div class="card">
-          <div class="card-body">
-            <!--
-              <div class="float-end">
-                <form class="d-inline-flex mb-3">
-                  <label class="my-1 me-2" for="order-selectinput"
-                    >Campaigns</label
-                  >
-                  <select class="form-select" id="order-selectinput">
-                    <option selected="">All</option>
-                    <option value="1">Active</option>
-                    <option value="2">Inactive</option>
-                  </select>
-                </form>
-              </div>
-            -->
-          </div>
           <div
             class="
             table table-centered
@@ -259,7 +231,6 @@ export default {
                 :items="dataCampaigns"
                 :fields="fields"
                 responsive="sm"
-                :per-page="perPage"
                 :current-page="currentPage"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
@@ -269,14 +240,25 @@ export default {
                 <template v-slot:cell(description)="dataCampaigns">
                   {{ dataCampaigns.item.description | truncate }}
                 </template>
+                <template v-slot:cell(website)="dataCampaigns">
+                  <a :href="dataCampaigns.item.website" target="_blank">
+                    {{ dataCampaigns.item.website }}
+                  </a>
+                </template>
                 <template v-slot:cell(action)="data">
-                  <div class="text-center">
-                    <i
-                      role="button"
-                      @click="editCampaign(data.item.id)"
-                      class="uil uil-pen font-size-18 text-primary"
-                    ></i>
-                  </div>
+                  <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                      <a
+                        href="javascript:void(0);"
+                        class="px-2 text-primary"
+                        v-b-tooltip.hover
+                        @click="editCampaign(data.item.id)"
+                        title="Edit"
+                      >
+                        <i class="uil uil-pen font-size-18"></i>
+                      </a>
+                    </li>
+                  </ul>
                 </template>
               </b-table>
             </div>

@@ -31,12 +31,8 @@ export default {
           key: 'check',
           label: '',
         },
-
         {
           key: 'name',
-        },
-        {
-          key: 'description',
         },
         {
           key: 'price',
@@ -217,17 +213,6 @@ export default {
                     title="Edit"
                   >
                     <i class="uil uil-pen font-size-18"></i>
-                  </a>
-                </li>
-                <li class="list-inline-item">
-                  <a
-                    href="javascript:void(0);"
-                    class="px-2 text-danger"
-                    v-b-tooltip.hover
-                    @click="productDeleteHandler(data.item.id)"
-                    title="Delete"
-                  >
-                    <i class="uil uil-trash-alt font-size-18"></i>
                   </a>
                 </li>
               </ul>

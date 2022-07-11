@@ -72,7 +72,7 @@ class ParseServer {
   }
 
   async createCampaign(params) {
-    return await Parse.Cloud.run('campaign:adminCreate', params)
+    return await Parse.Cloud.run('campaign:admin:create', params)
   }
 
   async getCampaignDetail(params) {
@@ -115,7 +115,7 @@ class ParseServer {
     return await Parse.Cloud.run('product:deleteProduct', params)
   }
   async editCampaign(params) {
-    return await Parse.Cloud.run('campaign:adminEdit', params)
+    return Parse.Cloud.run('campaign:admin:edit', params)
   }
 
   async getTransactions(params) {
@@ -181,6 +181,20 @@ class ParseServer {
    */
   async convertVREFtoUSDC(params) {
     return Parse.Cloud.run('exchange:convert', params)
+  }
+
+  /**
+   * @function getCategoryList
+   * Returns a list of currencies
+   * @returns {Category[]}
+   */
+  async getCategoryList() {
+    console.log('run')
+    return await Parse.Cloud.run('category:list')
+  }
+  fileHandler(name, data) {
+    const parseFile = new Parse.File(name, data)
+    parseFile.save().then(() => console.log(parseFile.url()))
   }
 }
 
