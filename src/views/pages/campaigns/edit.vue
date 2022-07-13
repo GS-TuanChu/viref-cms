@@ -39,6 +39,11 @@ export default {
       }
       return 'Commission'
     },
+    productImage() {
+      if (this.params.product && this.params.product.length)
+        return this.params.product[0]
+      else return this.params.product
+    },
   },
   created() {
     const params = {
@@ -220,7 +225,12 @@ export default {
               label-for="product"
             >
               <div class="col-md-6">
-                <img :src="params.product[0]" alt="product" width="600" height="auto" />
+                <img
+                  :src="productImage"
+                  alt="product"
+                  width="600"
+                  height="auto"
+                />
               </div>
             </b-form-group>
           </div>
@@ -308,11 +318,7 @@ export default {
           </div>
           <div class="row">
             <div class="col-md-3">
-              <b-form-group
-                class="mb-3"
-                label="Network"
-                label-for="network"
-              >
+              <b-form-group class="mb-3" label="Network" label-for="network">
                 <b-form-input
                   for="text"
                   v-model.number="params.network"
@@ -320,11 +326,7 @@ export default {
               </b-form-group>
             </div>
             <div class="col-md-3">
-              <b-form-group
-                class="mb-3"
-                label="Type"
-                label-for="type"
-              >
+              <b-form-group class="mb-3" label="Type" label-for="type">
                 <b-form-input
                   for="text"
                   v-model.number="params.type"

@@ -6,7 +6,8 @@ class ParseServer {
       process.env.VUE_APP_PARSE_DEV_APPID,
       process.env.VUE_APP_PARSE_DEV_JSKEY
     )
-    Parse.serverURL = process.env.VUE_APP_PARSE_DEV_SERVERURL
+    Parse.serverURL = process.env.VUE_APP_PARSE_SERVERURL
+    // Parse.serverURL = process.env.VUE_APP_PARSE_DEV_SERVERURL
   }
 
   async logIn(params) {
@@ -42,10 +43,7 @@ class ParseServer {
   }
 
   async editUser(params) {
-    let t0 = performance.now()
     const user = await Parse.Cloud.run('user:edit', params)
-    let t1 = performance.now()
-    console.log(t1 - t0)
     return user
   }
 
@@ -172,6 +170,21 @@ class ParseServer {
   async getCurrencyList() {
     return Parse.Cloud.run('currency:list')
   }
+
+  /**
+   * @function getCurrencyInfo
+   * Returns a currency object
+   *
+   * @param { {currencyId: string} } params
+   * typedef {object} Currency
+   * @property {string} id
+   * @property {string} name
+   * @property {string} symbol
+   * @returns {Currency}
+   */
+  async getCurrencyInfo(params) {
+    return Parse.Cloud.run('currency:get', params)
+  }
   /**
    * @function convertVREFtoUSDC
    * Returns the converted amount from VREF to USDC
@@ -189,7 +202,6 @@ class ParseServer {
    * @returns {Category[]}
    */
   async getCategoryList() {
-    console.log('run')
     return await Parse.Cloud.run('category:list')
   }
   fileHandler(name, data) {

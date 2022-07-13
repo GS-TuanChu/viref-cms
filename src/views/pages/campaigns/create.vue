@@ -17,7 +17,7 @@ export default {
         description: '',
         product: null,
         website: '',
-        commission: null,
+        commission: 0,
         contact: '',
         network: '',
         startDate: null,
@@ -175,7 +175,7 @@ export default {
               </b-form-group>
             </div>
             <div class="col-md-4">
-              <b-form-group id="example text" label="Mine" label-for="mine">
+              <b-form-group label="Mine" label-for="mine">
                 <b-form-select v-model="params.mine" :options="mineOptions">
                   <template #first>
                     <b-form-select-option :value="null"
@@ -191,12 +191,7 @@ export default {
           </div>
           <div class="row">
             <div class="col-md-6">
-              <b-form-group
-                class="mb-3"
-                id="example text"
-                label="Name"
-                label-for="name"
-              >
+              <b-form-group class="mb-3" label="Name" label-for="name">
                 <b-form-input
                   for="text"
                   v-model.trim="params.name"
@@ -260,6 +255,7 @@ export default {
               <b-form-group class="mb-3" label="Contact" label-for="contact">
                 <b-form-input
                   for="text"
+                  autocomplete="off"
                   v-model="params.contact"
                 ></b-form-input>
               </b-form-group>
@@ -268,6 +264,7 @@ export default {
               <b-form-group class="mb-3" label="Network" label-for="network">
                 <b-form-input
                   for="text"
+                  autocomplete="off"
                   v-model="params.network"
                 ></b-form-input>
               </b-form-group>
@@ -283,6 +280,7 @@ export default {
               >
                 <b-form-input
                   for="text"
+                  autocomplete="off"
                   v-model.number="params.amount"
                 ></b-form-input>
                 <span class="error" v-if="!$v.params.amount.required"
@@ -331,7 +329,7 @@ export default {
           </div>
         </form>
       </div>
-      <div class="button-items text-center">
+      <div v-if="!isSubmitting" class="button-items text-center mb-3">
         <b-button
           @click="submit"
           size="lg"
@@ -343,6 +341,9 @@ export default {
         <b-button @click="cancel" size="lg" variant="secondary"
           >Cancel</b-button
         >
+      </div>
+      <div v-else class="text-center">
+        <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
       </div>
     </div>
   </Layout>
