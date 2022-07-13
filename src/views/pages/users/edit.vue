@@ -1,5 +1,4 @@
 <script>
-import Swal from 'sweetalert2'
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import { userMethods, userComputed } from '@/state/helpers'
@@ -14,21 +13,39 @@ export default {
       title: 'User Edit',
       params: {},
       selected: [],
-      selectedOldValue: [],
       amount: 0,
       isSubmitting: false,
       roles: ['admin', 'server', 'marketing', 'customer_support'],
       query: {},
-      clonedParams: {},
       isRoleChanged: false,
       isDisabled: true,
+      currencies: [],
+      balances: [],
+      selectedCurrency: null,
     }
   },
-
+  watch: {
+    selectedCurrency(newVal) {
+      if (this.balances.length) {
+        const amount = this.balances.filter((b) => b.id === newVal)[0]
+        this.params.balance = amount && amount.balance ? amount.balance : 0
+      }
+    },
+  },
   computed: {
     ...userComputed,
+    computedCurrency() {
+      const currencies = []
+      this.currencies.forEach((c) => {
+        const obj = {
+          value: c.id,
+          text: c.name,
+        }
+        currencies.push(obj)
+      })
+      return currencies
+    },
   },
-
   created() {
     this.query = this.$route.query
     const userInfo = this.user(this.$route.params.id)
@@ -39,16 +56,16 @@ export default {
       return
     }
     this.$parse.getUserDetail(this.$route.params.id).then((dataUser) => {
-      this.constructUserObject([dataUser])
+      this.constructUserObject(dataUser)
       this.selected = [...this.params.roles]
       this.watchHandler()
+    })
+    this.$parse.getCurrencyList().then((res) => {
+      this.currencies = [...res]
     })
   },
   methods: {
     ...userMethods,
-    successmsg() {
-      Swal.fire('Done!', 'Data has been saved', 'success')
-    },
     watchHandler() {
       const watchParams = [
         'params.phone',
@@ -67,18 +84,17 @@ export default {
       })
     },
     constructUserObject(data) {
-      this.params = data.map((dataUser) => {
-        return {
-          id: dataUser.user.id,
-          username: dataUser.user.get('username'),
-          email: dataUser.user.get('email'),
-          phone: dataUser.user.get('phone'),
-          roles: dataUser.roles,
-          bankAccount: dataUser.user.get('bankAccount') || '0',
-          balance: dataUser.user.get('balance') || 0,
-          balanceToken: dataUser.user.get('balanceToken') || 0,
-        }
-      })[0]
+      this.params = {
+        id: data.user.id,
+        username: data.user.get('username'),
+        email: data.user.get('email'),
+        phone: data.user.get('phone'),
+        roles: data.roles,
+        bankAccount: data.user.get('bankAccount') || '0',
+        balanceToken: data.user.get('balanceToken') || 0,
+      }
+      this.balances = [...data.balance]
+      if (this.balances.length) this.selectedCurrency = this.balances[0].id
     },
     async submit() {
       try {
@@ -109,6 +125,7 @@ export default {
         }
         this.params.amount = this.amount
         this.params.roles = this.selected
+        this.params.currencyId = this.selectedCurrency
         this.$parse.editUser(this.params).then(({ id }) => {
           if (id) {
             const payload = { id, params: this.params }
@@ -161,18 +178,49 @@ export default {
               </b-form-group>
             </div>
             <div class="col-md-6">
-              <b-form-group class="mb-3" label="Email" label-for="email">
-                <b-form-input for="text" v-model="params.email"></b-form-input>
+              <b-form-group class="mb-3" label="Amount" label-for="amount">
+                <b-input-group>
+                  <b-form-input
+                    for="text"
+                    v-model.number="amount"
+                  ></b-form-input>
+                  <b-form-select
+                    v-model="selectedCurrency"
+                    :options="computedCurrency"
+                  >
+                    <template #first>
+                      <b-form-select-option value="" disabled selected>
+                        -- Please select an option --</b-form-select-option
+                      >
+                    </template>
+                  </b-form-select></b-input-group
+                >
               </b-form-group>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
+              <b-form-group class="mb-3" label="Email" label-for="email">
+                <b-form-input for="text" v-model="params.email"></b-form-input>
+              </b-form-group>
+            </div>
+            <div class="col-md-6">
+              <b-form-group class="mb-3" label="Balance" label-for="balance">
+                <b-form-input
+                  for="text"
+                  v-model.number="params.balance"
+                  disabled
+                ></b-form-input>
+              </b-form-group>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
               <b-form-group class="mb-3" label="Phone" label-for="phone">
                 <b-form-input for="text" v-model="params.phone"></b-form-input>
               </b-form-group>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <b-form-group
                 class="mb-3"
                 label="Bank Account"
@@ -181,17 +229,6 @@ export default {
                 <b-form-input
                   for="text"
                   v-model="params.bankAccount"
-                ></b-form-input>
-              </b-form-group>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <b-form-group class="mb-3" label="Balance" label-for="balance">
-                <b-form-input
-                  for="text"
-                  v-model.number="params.balance"
-                  disabled
                 ></b-form-input>
               </b-form-group>
             </div>
@@ -208,23 +245,16 @@ export default {
               </b-form-group>
             </div>
           </div>
+          <div class="row"></div>
           <div class="row">
-            <div class="col-md-6">
-              <b-form-group class="mb-3" label="Amount" label-for="amount">
-                <b-form-input for="text" v-model.number="amount"></b-form-input>
-              </b-form-group>
-            </div>
-            <div class="col-md-6"></div>
+            <b-form-group class="col-md-6" label="Roles:" label-for="roles">
+              <b-form-checkbox-group
+                v-model="selected"
+                :options="roles"
+                name="flavour-1"
+              ></b-form-checkbox-group>
+            </b-form-group>
           </div>
-          <b-form-group label="Roles:" label-for="roles">
-            <b-form-checkbox-group
-              id="checkbox-group-1"
-              class="ml-3"
-              v-model="selected"
-              :options="roles"
-              name="flavour-1"
-            ></b-form-checkbox-group>
-          </b-form-group>
         </form>
       </div>
 
@@ -251,3 +281,9 @@ export default {
     </div>
   </Layout>
 </template>
+
+<style>
+.custom-control-label {
+  margin-left: 5px;
+}
+</style>

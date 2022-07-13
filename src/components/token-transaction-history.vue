@@ -9,6 +9,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 export default {
   name: 'TokenTransactionHistory',
   components: { Chart, Calendar },
+  mixins: [usersMixin, campaignsMixin],
   data() {
     return {
       user: null,
@@ -117,7 +118,6 @@ export default {
   directives: {
     clickOutside: vClickOutside.directive,
   },
-  mixins: [usersMixin, campaignsMixin],
   methods: {
     async getCurrencyList() {
       this.$parse.getCurrencyList().then((res) =>

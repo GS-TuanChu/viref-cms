@@ -2,6 +2,7 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import appConfig from '@/app.config'
+import campaignsMixin from '@/mixins/campaigns'
 
 export default {
   components: { Layout, PageHeader },
@@ -14,6 +15,7 @@ export default {
       },
     ],
   },
+  mixins: [campaignsMixin],
   data() {
     return {
       title: 'Campaigns',
@@ -55,11 +57,11 @@ export default {
         },
         {
           key: 'startDate',
-          sortable: true,
+          // sortable: true,
         },
         {
           key: 'endDate',
-          sortable: true,
+          // sortable: true,
         },
         'action',
       ],
@@ -93,24 +95,6 @@ export default {
       this.totalRows = filteredItems.length
       this.currentPage = 1
     },
-    constructCampaignObject(data) {
-      return data.map((campaign) => {
-        return {
-          id: campaign.id,
-          name: campaign.get('name'),
-          currency: campaign.get('currency').get('name'),
-          description: campaign.get('description'),
-          website: campaign.get('website'),
-          network: campaign.get('rootNode').id,
-          amount: campaign.get('amount'),
-          commission: campaign.get('commission'),
-          type: campaign.get('type'),
-          product: campaign.get('product').get('name'),
-          startDate: this.formatDate(campaign.get('startDate')),
-          endDate: this.formatDate(campaign.get('endDate')),
-        }
-      })
-    },
     addNewCampaign() {
       this.$router.push({ name: 'campaign-create' })
     },
@@ -133,7 +117,7 @@ export default {
   },
   filters: {
     truncate(text) {
-      return text.slice(0, 25) + '...'
+      if (text) return text.slice(0, 25) + '...'
     },
   },
 }
@@ -145,6 +129,7 @@ export default {
     <div v-if="dataCampaigns.length == 0" class="text-center">
       <b-spinner class="m-2" variant="primary" role="status"></b-spinner>
     </div>
+
     <div v-else class="row">
       <div class="col-12">
         <div class="card">
@@ -180,6 +165,7 @@ export default {
                     <b-col>
                       <div class="position-relative">
                         <b-form-input
+                          autocomplete="off"
                           v-model="filter"
                           type="search"
                           placeholder="Search..."
@@ -242,7 +228,7 @@ export default {
                 </template>
                 <template v-slot:cell(website)="dataCampaigns">
                   <a :href="dataCampaigns.item.website" target="_blank">
-                    {{ dataCampaigns.item.website }}
+                    {{ dataCampaigns.item.website | truncate }}
                   </a>
                 </template>
                 <template v-slot:cell(action)="data">

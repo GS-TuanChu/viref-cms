@@ -28,8 +28,7 @@ export default {
       sortDesc: false,
       fields: [
         {
-          key: 'check',
-          label: '',
+          key: 'id',
         },
         {
           key: 'name',
@@ -46,12 +45,8 @@ export default {
   },
   middleware: 'authentication',
   computed: {
-    /**
-     * Total no. of records
-     */
     rows() {
       return 1
-      // return this.orderData.length;
     },
   },
   mounted() {
@@ -109,27 +104,9 @@ export default {
 
     <div v-else class="row">
       <div class="col-12">
-        <div>
-          <div class="float-end">
-            <form class="d-inline-flex mb-3">
-              <label class="my-1 me-2" for="order-selectinput">Products</label>
-              <select class="form-select" id="order-selectinput">
-                <option selected="">All</option>
-                <option value="1">Newest</option>
-                <option value="2">Oldest</option>
-              </select>
-            </form>
-          </div>
-          <button
-            @click="addNewProduct"
-            type="button"
-            class="btn btn-success mb-3"
-          >
-            <i class="mdi mdi-plus me-1"></i> Add New Product
-          </button>
-        </div>
-        <div
-          class="
+        <div class="card">
+          <div
+            class="
             table table-centered
             datatable
             dt-responsive
@@ -139,85 +116,117 @@ export default {
             no-footer
             dtr-inline
           "
-        >
-          <div class="row">
-            <div class="col-sm-12 col-md-6">
-              <div id="tickets-table_length" class="dataTables_length">
-                <label class="d-inline-flex align-items-center fw-normal">
-                  Show&nbsp;
-                  <b-form-select
-                    v-model="perPage"
-                    size="sm"
-                    :options="pageOptions"
-                  ></b-form-select
-                  >&nbsp;entries
-                </label>
-              </div>
-            </div>
-            <!-- Search -->
-            <div class="col-sm-12 col-md-6">
-              <div
-                id="tickets-table_filter"
-                class="dataTables_filter text-md-end"
-              >
-                <label class="d-inline-flex align-items-center fw-normal">
-                  Search:
-                  <b-form-input
-                    v-model="filter"
-                    type="search"
-                    placeholder="Search..."
-                    class="form-control form-control-sm ms-2"
-                  ></b-form-input>
-                </label>
-              </div>
-            </div>
-            <!-- End search -->
-          </div>
-          <!-- Table -->
-
-          <b-table
-            table-class="table table-centered datatable table-card-list"
-            thead-tr-class="bg-transparent"
-            :items="dataProducts"
-            :fields="fields"
-            responsive="sm"
-            :per-page="perPage"
-            :current-page="currentPage"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :filter="filter"
-            :filter-included-fields="filterOn"
-            @filtered="onFiltered"
           >
-            <template v-slot:cell(check)="data">
-              <div class="custom-control custom-checkbox text-center">
-                <input
-                  type="checkbox"
-                  class="custom-control-input"
-                  :id="`contacusercheck${data.item.id}`"
-                />
-                <label
-                  class="custom-control-label"
-                  :for="`contacusercheck${data.item.id}`"
-                ></label>
-              </div>
-            </template>
-            <template v-slot:cell(action)="data">
-              <ul class="list-inline mb-0">
-                <li class="list-inline-item">
-                  <a
-                    href="javascript:void(0);"
-                    class="px-2 text-primary"
-                    v-b-tooltip.hover
-                    @click="editProduct(data.item.id)"
-                    title="Edit"
+            <div class="row">
+              <!-- Search -->
+              <div class="col-sm-12 col-md-6">
+                <div class="container">
+                  <button
+                    @click="addNewProduct"
+                    type="button"
+                    class="btn btn-success mb-3"
                   >
-                    <i class="uil uil-pen font-size-18"></i>
-                  </a>
-                </li>
-              </ul>
-            </template>
-          </b-table>
+                    <i class="mdi mdi-plus me-1"></i> Add New Product
+                  </button>
+                </div>
+              </div>
+              <!-- Search -->
+              <div class="col-sm-12 col-md-6">
+                <b-container>
+                  <b-row>
+                    <b-col> </b-col>
+                    <b-col>
+                      <div class="position-relative">
+                        <b-form-input
+                          autocomplete="off"
+                          v-model="filter"
+                          type="search"
+                          placeholder="Search..."
+                          class="form-control rounded bg-light border-0"
+                        ></b-form-input>
+                        <div
+                          v-if="filter"
+                          class="search-results form-control card position-absolute p-2 mt-1 overflow-auto"
+                        >
+                          <div v-if="isSearching" class="text-center">
+                            <b-spinner
+                              class="m-2"
+                              variant="primary"
+                              role="status"
+                            ></b-spinner>
+                          </div>
+                          <div v-if="!isSearching && searchResults.length">
+                            <template v-for="(item, index) of searchResults">
+                              <div :key="index" class="search-results-item">
+                                <span
+                                  role="button"
+                                  @click="editCampaign(item.id)"
+                                >
+                                  {{ item.name }}
+                                </span>
+                              </div>
+                            </template>
+                          </div>
+                          <div
+                            v-if="!isSearching && !searchResults.length"
+                            class="text-center"
+                          >
+                            No Results found
+                          </div>
+                        </div>
+                      </div>
+                    </b-col>
+                  </b-row>
+                </b-container>
+              </div>
+              <!-- End search -->
+            </div>
+            <!-- Table -->
+
+            <b-table
+              table-class="table table-centered datatable table-card-list"
+              thead-tr-class="bg-transparent"
+              :items="dataProducts"
+              :fields="fields"
+              responsive="sm"
+              :per-page="perPage"
+              :current-page="currentPage"
+              :sort-by.sync="sortBy"
+              :sort-desc.sync="sortDesc"
+              :filter="filter"
+              :filter-included-fields="filterOn"
+              @filtered="onFiltered"
+            >
+              <template v-slot:cell(check)="data">
+                <div class="custom-control custom-checkbox text-center">
+                  <input
+                    type="checkbox"
+                    class="custom-control-input"
+                    :id="`contacusercheck${data.item.id}`"
+                  />
+                  <label
+                    class="custom-control-label"
+                    :for="`contacusercheck${data.item.id}`"
+                  ></label>
+                </div>
+              </template>
+              <template v-slot:cell(action)="data">
+                <ul class="list-inline mb-0">
+                  <li class="list-inline-item">
+                    <a
+                      href="javascript:void(0);"
+                      class="px-2 text-primary"
+                      v-b-tooltip.hover
+                      @click="editProduct(data.item.id)"
+                      title="Edit"
+                    >
+                      <i class="uil uil-pen font-size-18"></i>
+                    </a>
+                  </li>
+                </ul>
+              </template>
+            </b-table>
+          </div>
         </div>
         <div class="row">
           <div class="col">
