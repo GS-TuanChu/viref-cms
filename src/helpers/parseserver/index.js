@@ -21,6 +21,12 @@ class ParseServer {
     }
   }
 
+  /**
+   * @function logIn
+   * @param {{ username: string, password: string }} params
+   * @returns {ParseUser}
+   */
+
   async logIn(params) {
     const user = await Parse.User.logIn(params.email, params.password)
     return user
