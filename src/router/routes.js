@@ -58,35 +58,35 @@ export default [
       },
     },
   },
-  {
-    path: '/logout',
-    name: 'logout',
-    meta: {
-      authRequired: true,
-      beforeResolve(routeTo, routeFrom, next) {
-        if (process.env.VUE_APP_DEFAULT_AUTH === 'firebase') {
-          store.dispatch('auth/logOut')
-        } else if (process.env.VUE_APP_DEFAULT_AUTH === 'fakebackend') {
-          store.dispatch('authfack/logout')
-        } else if (process.env.VUE_APP_DEFAULT_AUTH === 'parse') {
-          store.dispatch('authparse/logout')
-        }
-        const authRequiredOnPreviousRoute = routeFrom.matched.some((route) =>
-          route.push('/login')
-        )
-        // Navigate back to previous page, or home as a fallback
-        next(
-          authRequiredOnPreviousRoute
-            ? {
-                name: 'home',
-              }
-            : {
-                ...routeFrom,
-              }
-        )
-      },
-    },
-  },
+  // {
+  //   path: '/logout',
+  //   name: 'logout',
+  //   meta: {
+  //     authRequired: true,
+  //     beforeResolve(routeTo, routeFrom, next) {
+  //       if (process.env.VUE_APP_DEFAULT_AUTH === 'firebase') {
+  //         store.dispatch('auth/logOut')
+  //       } else if (process.env.VUE_APP_DEFAULT_AUTH === 'fakebackend') {
+  //         store.dispatch('authfack/logout')
+  //       } else if (process.env.VUE_APP_DEFAULT_AUTH === 'parse') {
+  //         store.dispatch('authparse/logout')
+  //       }
+  //       const authRequiredOnPreviousRoute = routeFrom.matched.some((route) =>
+  //         route.push('/login')
+  //       )
+  //       // Navigate back to previous page, or home as a fallback
+  //       next(
+  //         authRequiredOnPreviousRoute
+  //           ? {
+  //               name: 'home',
+  //             }
+  //           : {
+  //               ...routeFrom,
+  //             }
+  //       )
+  //     },
+  //   },
+  // },
   {
     path: '/charts',
     name: '',
@@ -777,5 +777,9 @@ export default [
       authRequired: true,
     },
     component: () => import('../views/pages/history/index'),
+  },
+  {
+    path: '*',
+    component: () => import('../views/pages/utility/404'),
   },
 ]
