@@ -2,18 +2,37 @@
 import Layout from '../../layouts/main'
 import PageHeader from '@/components/page-header'
 import { userMethods, userComputed } from '@/state/helpers'
+import { integer } from 'vuelidate/lib/validators'
+import errorMixin from '@/mixins/error'
+
+function editBalanceValidation() {
+  if (this.showBalanceEdit) {
+    if (this.amount && !this.note) return false
+    return true
+  }
+  return true
+}
+
+function amountValidation() {
+  if (this.showBalanceEdit) {
+    if (this.note && !this.amount) return false
+    return true
+  }
+  return true
+}
 
 export default {
   components: { Layout, PageHeader },
   page: {
     title: 'User Edit',
   },
+  mixins: [errorMixin],
   data() {
     return {
       title: 'User Edit',
       params: {},
       selected: [],
-      amount: 0,
+      amount: null,
       isSubmitting: false,
       roles: ['admin', 'server', 'marketing', 'customer_support'],
       query: {},
@@ -22,6 +41,19 @@ export default {
       currencies: [],
       balances: [],
       selectedCurrency: null,
+      showBalanceEdit: false,
+      note: '',
+    }
+  },
+  validations() {
+    return {
+      amount: {
+        integer,
+        amountValidation,
+      },
+      note: {
+        editBalanceValidation,
+      },
     }
   },
   watch: {
@@ -45,16 +77,12 @@ export default {
       })
       return currencies
     },
+    balanceButton() {
+      return this.showBalanceEdit ? 'Cancel editing' : 'Edit balance'
+    },
   },
   created() {
     this.query = this.$route.query
-    const userInfo = this.user(this.$route.params.id)
-    if (userInfo) {
-      this.params = userInfo
-      this.watchHandler()
-      if (this.params.roles.length) this.selected = this.params.roles
-      return
-    }
     this.$parse.getUserDetail(this.$route.params.id).then((dataUser) => {
       this.constructUserObject(dataUser)
       this.selected = [...this.params.roles]
@@ -85,7 +113,7 @@ export default {
     },
     constructUserObject(data) {
       this.params = {
-        id: data.user.id,
+        uid: data.user.id,
         username: data.user.get('username'),
         email: data.user.get('email'),
         phone: data.user.get('phone'),
@@ -94,7 +122,10 @@ export default {
         balanceToken: data.user.get('balanceToken') || 0,
       }
       this.balances = [...data.balance]
-      if (this.balances.length) this.selectedCurrency = this.balances[0].id
+      if (this.balances && this.balances.length) {
+        this.selectedCurrency = this.balances[0].id
+        this.params.balance = this.balances[0].balance
+      }
     },
     async submit() {
       try {
@@ -107,7 +138,7 @@ export default {
           })
           removeRoles.forEach((r) => {
             param = {
-              id: this.params.id,
+              id: this.params.uid,
               role: r,
               operation: 'remove',
             }
@@ -115,7 +146,7 @@ export default {
           })
           this.selected.forEach((r) => {
             param = {
-              id: this.params.id,
+              id: this.params.uid,
               role: r,
               operation: 'add',
             }
@@ -126,14 +157,24 @@ export default {
         this.params.amount = this.amount
         this.params.roles = this.selected
         this.params.currencyId = this.selectedCurrency
-        this.$parse.editUser(this.params).then(({ id }) => {
-          if (id) {
-            const payload = { id, params: this.params }
-            this.updateUser(payload)
+        this.params.note = this.note
+        this.$parse
+          .editUser(this.params)
+          .then(({ id }) => {
+            if (id) {
+              const payload = {
+                id,
+                params: this.params,
+              }
+              this.updateUser(payload)
+              this.isSubmitting = false
+              this.$router.go()
+            }
+          })
+          .catch((error) => {
             this.isSubmitting = false
-            this.$router.go()
-          }
-        })
+            this.errorAlert(error)
+          })
       } catch (error) {
         console.log(error)
       }
@@ -141,12 +182,20 @@ export default {
     cancel() {
       this.$router.push({
         name: 'users',
-        query: { page: this.query.page },
+        query: {
+          page: this.query.page,
+        },
       })
     },
     selectedRoles(event) {
       this.params.roles = []
       this.params.roles.push(event.target.innerHTML)
+    },
+    editBalanceHandler() {
+      this.showBalanceEdit = !this.showBalanceEdit
+    },
+    deleteHandler() {
+      this.$parse.userDelete(this.params.uid).then((res) => console.log(res))
     },
   },
 }
@@ -155,7 +204,8 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" />
-    <div class="row" v-if="params.id">
+    <b-button @click="deleteHandler">Delete</b-button>
+    <div class="row" v-if="params.uid">
       <div class="col-lg-12" id="addproduct-accordion">
         <form class="form-horizontal" role="form">
           <div class="row mb-5">
@@ -172,52 +222,92 @@ export default {
             <div class="col-md-6">
               <b-form-group class="mb-3" label="Username" label-for="username">
                 <b-form-input
+                  autocomplete="off"
                   for="text"
                   v-model="params.username"
                 ></b-form-input>
               </b-form-group>
             </div>
-            <div class="col-md-6">
-              <b-form-group class="mb-3" label="Amount" label-for="amount">
+            <div class="col-md-6 mb-3">
+              <b-form-group label="Balance" label-for="balance">
                 <b-input-group>
                   <b-form-input
                     for="text"
-                    v-model.number="amount"
+                    v-model.number="params.balance"
+                    disabled
                   ></b-form-input>
+                  <b-form-group class="position-relative">
+                    <b-form-input
+                      v-if="showBalanceEdit"
+                      autocomplete="off"
+                      for="text"
+                      v-model.number="amount"
+                      trim
+                      placeholder="Enter an amount"
+                    ></b-form-input>
+                    <div class="position-absolute">
+                      <span class="error" v-if="!$v.amount.integer"
+                        >Amount must be a number.</span
+                      >
+                      <span class="error" v-if="!$v.amount.amountValidation"
+                        >Amount can not be empty.</span
+                      >
+                    </div>
+                  </b-form-group>
                   <b-form-select
                     v-model="selectedCurrency"
                     :options="computedCurrency"
                   >
                     <template #first>
-                      <b-form-select-option value="" disabled selected>
-                        -- Please select an option --</b-form-select-option
+                      <b-form-select-option disabled selected>
+                        -- please select an option --</b-form-select-option
                       >
                     </template>
-                  </b-form-select></b-input-group
-                >
+                  </b-form-select>
+
+                  <b-button variant="primary" @click="editBalanceHandler">{{
+                    balanceButton
+                  }}</b-button>
+                </b-input-group>
               </b-form-group>
             </div>
           </div>
-          <div class="row">
+          <div class="row mb-3">
             <div class="col-md-6">
-              <b-form-group class="mb-3" label="Email" label-for="email">
-                <b-form-input for="text" v-model="params.email"></b-form-input>
-              </b-form-group>
-            </div>
-            <div class="col-md-6">
-              <b-form-group class="mb-3" label="Balance" label-for="balance">
+              <b-form-group label="Email" label-for="email">
                 <b-form-input
+                  autocomplete="off"
                   for="text"
-                  v-model.number="params.balance"
-                  disabled
+                  v-model="params.email"
                 ></b-form-input>
               </b-form-group>
+            </div>
+
+            <div v-if="showBalanceEdit" class="col-md-6">
+              <b-form-group label="Note" label-for="note">
+                <b-input-group>
+                  <b-form-textarea
+                    rows="3"
+                    for="text"
+                    v-model="note"
+                    placeholder="Notes for editing user's balance"
+                  ></b-form-textarea>
+                </b-input-group>
+              </b-form-group>
+              <span class="error" v-if="!$v.note.editBalanceValidation">
+                Please specify a reason for changing balance.
+              </span>
             </div>
           </div>
           <div class="row">
             <div class="col-md-3">
               <b-form-group class="mb-3" label="Phone" label-for="phone">
-                <b-form-input for="text" v-model="params.phone"></b-form-input>
+                <b-form-input
+                  autocomplete=""
+                  off
+                  for="text"
+                  v-model="params.phone"
+                ></b-form-input>
               </b-form-group>
             </div>
             <div class="col-md-3">
@@ -227,6 +317,7 @@ export default {
                 label-for="bankaccount"
               >
                 <b-form-input
+                  autocomplete="off"
                   for="text"
                   v-model="params.bankAccount"
                 ></b-form-input>
@@ -239,13 +330,13 @@ export default {
                 label-for="balanceToken"
               >
                 <b-form-input
+                  autocomplete="off"
                   for="text"
                   v-model.number="params.balanceToken"
                 ></b-form-input>
               </b-form-group>
             </div>
           </div>
-          <div class="row"></div>
           <div class="row">
             <b-form-group class="col-md-6" label="Roles:" label-for="roles">
               <b-form-checkbox-group
@@ -264,7 +355,7 @@ export default {
           size="lg"
           variant="primary"
           class="float-right"
-          :disabled="isDisabled"
+          :disabled="$v.$invalid"
         >
           Save changes
         </b-button>

@@ -2,13 +2,19 @@
 import Layout from '../../layouts/main'
 import TransactionHistory from '@/components/transaction-history'
 import TokenTransactionHistory from '@/components/token-transaction-history'
+import WalletTransactionHistory from '@/components/wallet-transaction-history'
 import { userComputed } from '@/state/helpers'
 
 export default {
   page: {
     title: 'History',
   },
-  components: { Layout, TransactionHistory, TokenTransactionHistory },
+  components: {
+    Layout,
+    TransactionHistory,
+    TokenTransactionHistory,
+    WalletTransactionHistory,
+  },
   data() {
     return {
       title: 'History',
@@ -43,6 +49,15 @@ export default {
             <span class="d-none d-sm-inline-block">Token Transaction</span>
           </template>
           <TokenTransactionHistory :params="this.$route.params.params" />
+        </b-tab>
+        <b-tab>
+          <template v-slot:title>
+            <span class="d-inline-block d-sm-none">
+              <i class="far fa-user"></i>
+            </span>
+            <span class="d-none d-sm-inline-block">Wallet Transaction</span>
+          </template>
+          <WalletTransactionHistory :params="this.$route.params.params" />
         </b-tab>
       </b-tabs>
     </div>

@@ -4,12 +4,13 @@ import campaignsMixin from '@/mixins/campaigns'
 import vClickOutside from 'v-click-outside'
 import Chart from '@/views/pages/dashboard/token-transactions'
 import Calendar from '@/components/calendar'
+import errorMixin from '@/mixins/error'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 export default {
-  name: 'TokenTransactionHistory',
+  name: 'WalletTransactionHistory',
   components: { Chart, Calendar },
-  mixins: [usersMixin, campaignsMixin],
+  mixins: [usersMixin, campaignsMixin, errorMixin],
   data() {
     return {
       user: null,
@@ -17,16 +18,17 @@ export default {
       uid: null,
       cid: null,
       selectedCurrency: null,
-      tokenTxData: [],
-      tokenHistoryData: {},
-      tokenTxHistoryDetails: [],
+      walletTxData: [],
+      walletHistoryData: {},
+      walletTxHistoryDetails: [],
       fields: [
-        'tokenTransactionId',
+        'walletTransactionId',
         'campaign',
         'campaignOwner',
-        'contact',
+        // 'contact',
         'amount',
         'transactionDate',
+        'note',
       ],
       meta: {},
       searchUsers: [],
@@ -109,7 +111,7 @@ export default {
     },
   },
   created() {
-    this.fetchInitTokenTxHistory()
+    this.fetchInitWalletTxHistory()
     this.getCurrencyList()
   },
   directives: {
@@ -123,9 +125,9 @@ export default {
         })
       )
     },
-    async fetchInitTokenTxHistory() {
+    async fetchInitWalletTxHistory() {
       if (this.params) {
-        this.fetchTokenTxHistoryByCampaign(this.params)
+        this.fetchWalletTxHistoryByCampaign(this.params)
       }
     },
     setDateRange(value) {
@@ -151,14 +153,10 @@ export default {
       if (searchText) {
         this.isSearching = true
         this.campaignSearchModalOpened = true
-        this.$parse
-          .searchCampaign({
-            searchText,
-          })
-          .then((res) => {
-            this.searchCampaigns = this.constructCampaignObject(res.campaigns)
-            this.isSearching = false
-          })
+        this.$parse.searchCampaign({ searchText }).then((res) => {
+          this.searchCampaigns = this.constructCampaignObject(res.campaigns)
+          this.isSearching = false
+        })
       } else this.userSearchModalOpened = false
       this.searchCampaigns.splice(0, this.searchCampaigns.length)
     },
@@ -204,7 +202,7 @@ export default {
           fromDate: this.dateRange[0],
           toDate: this.dateRange[1],
         }
-        this.fetchTokenTxHistoryByCampaign(params)
+        this.fetchWalletTxHistoryByCampaign(params)
       } else {
         if (!this.uid) return
         this.isSearchingToken = true
@@ -214,20 +212,21 @@ export default {
           fromDate: this.dateRange[0],
           toDate: this.dateRange[1],
         }
-        this.getTokenTxHistory(params)
+        this.getWalletTxHistory(params)
       }
     },
-    fetchTokenTxHistoryByCampaign(params) {
+    fetchWalletTxHistoryByCampaign(params) {
       this.isSearchingToken = true
       this.isDisabledCampaignInput = true
       this.$parse
-        .getTokenTxHistoryByCampaign(params)
+        .getWalletTxHistoryByCampaign(params)
         .then((res) => {
-          this.tokenHistoryData = res
-          this.tokenTxData = res.results
+          console.log(res)
+          this.walletHistoryData = res
+          this.walletTxData = res.results
           this.isSearchingToken = false
           this.isDisabledCampaignInput = false
-          this.tokenTxHistoryDetails = res.details
+          this.walletTxHistoryDetails = res.details
           this.meta = res.meta
           if (this.meta) {
             this.isSelectedUser = true
@@ -238,18 +237,24 @@ export default {
             this.cid = this.meta.cid
           }
         })
-        .catch((error) => console.log(error))
+        .catch((error) => {
+          this.isSearchingToken = false
+          this.isDisabledCampaignInput = false
+          this.errorAlert(error)
+          console.log(error)
+        })
     },
-    getTokenTxHistory(params) {
+    getWalletTxHistory(params) {
       this.$parse
-        .getTokenTxHistory(params)
+        .getWalletTxHistory(params)
         .then((res) => {
           this.isSearchingToken = false
-          this.tokenHistoryData = res
-          this.tokenTxHistoryDetails = res.details
+          this.walletHistoryData = res
+          this.walletTxHistoryDetails = res.details
         })
         .catch((error) => {
           this.isSearchingToken = false
+          this.errorAlert(error)
           console.log(error)
         })
     },
@@ -411,16 +416,19 @@ export default {
         <b-skeleton width="75%" :animated="animated"></b-skeleton>
         <b-skeleton width="95%" :animated="animated"></b-skeleton>
       </template>
-      <div v-show="!isSearchingToken && Object.keys(tokenHistoryData).length">
-        <Chart class="card" :data-object="tokenHistoryData" />
+      <div v-show="!isSearchingToken && Object.keys(walletHistoryData).length">
+        <Chart class="card" :data-object="walletHistoryData" />
         <br />
         <div class="card">
-          <b-table striped :items="tokenTxHistoryDetails" :fields="fields">
-            <template #cell(tokenTransactionId)="data">
+          <b-table striped :items="walletTxHistoryDetails" :fields="fields">
+            <template #cell(walletTransactionId)="data">
               {{ data.item.id }}
             </template>
             <template #cell(transactionDate)="data">
               {{ data.item.date }}
+            </template>
+            <template #cell(note)="data">
+              {{ data.item.note }}
             </template>
           </b-table>
         </div>
