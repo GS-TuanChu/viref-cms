@@ -35,10 +35,13 @@ router.beforeEach((routeTo, routeFrom, next) => {
   if (process.env.VUE_APP_DEFAULT_AUTH === 'parse') {
     const publicPages = ['/login', '/register', '/forgot-password']
     const authpage = !publicPages.includes(routeTo.path)
+    const publicPage = publicPages.includes(routeTo.path)
     const loggeduser = JSON.parse(localStorage.getItem('currentUser'))
 
     if (authpage && !loggeduser) {
       return next('/login')
+    } else if (publicPage && loggeduser) {
+      next({ name: 'home' })
     } else {
       next()
     }
