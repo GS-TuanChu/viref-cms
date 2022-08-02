@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "build:dev": "vue-cli-service build --mode development"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^21.0.0",
@@ -82,18 +83,11 @@
     "env": {
       "node": true
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
+    "extends": ["plugin:vue/essential", "eslint:recommended"],
     "parserOptions": {
       "parser": "babel-eslint"
     },
     "rules": {}
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  "browserslist": ["> 1%", "last 2 versions", "not dead"]
 }

@@ -2,17 +2,27 @@ import Parse from 'parse'
 
 class ParseServer {
   constructor() {
-    Parse.initialize(
-      process.env.VUE_APP_PARSE_DEV_APPID,
-      process.env.VUE_APP_PARSE_DEV_JSKEY
-    )
-    Parse.serverURL = process.env.VUE_APP_PARSE_SERVERURL
-    // Parse.serverURL = process.env.VUE_APP_PARSE_DEV_SERVERURL
+    if (process.env.NODE_ENV === 'development') {
+      Parse.initialize(
+        process.env.VUE_APP_PARSE_DEV_APPID,
+        process.env.VUE_APP_PARSE_DEV_JSKEY
+        // process.env.VUE_APP_PARSE_APPID,
+        // process.env.VUE_APP_PARSE_JSKEY
+      )
+      Parse.serverURL = process.env.VUE_APP_PARSE_DEV_SERVERURL
+      // Parse.serverURL = 'https://viref.herokuapp.com/parse'
+      // Parse.serverURL = process.env.VUE_APP_PARSE_SERVERURL
+    } else if (process.env.NODE_ENV === 'production') {
+      Parse.initialize(
+        process.env.VUE_APP_PARSE_APPID,
+        process.env.VUE_APP_PARSE_JSKEY
+      )
+      Parse.serverURL = process.env.VUE_APP_PARSE_SERVERURL
+    }
   }
 
   async logIn(params) {
     const user = await Parse.User.logIn(params.email, params.password)
-    // const user = await Parse.Cloud.run('logIn', params)
     return user
   }
 
@@ -36,15 +46,18 @@ class ParseServer {
     return Parse.Cloud.run('user:getByRange', params)
   }
 
-  async getUserDetail(id) {
-    const params = { uid: id }
+  async isAdmin(params) {
+    return Parse.Cloud.run('user:isAdmin', params)
+  }
+
+  async getUserDetail(uid) {
+    const params = { uid }
     const userData = await Parse.Cloud.run('user:getUserDetail', params)
     return userData
   }
 
   async editUser(params) {
-    const user = await Parse.Cloud.run('user:edit', params)
-    return user
+    return Parse.Cloud.run('user:edit', params)
   }
 
   async searchUser(params) {
@@ -54,6 +67,10 @@ class ParseServer {
 
   async userRoleEdit(params) {
     return await Parse.Cloud.run('user:editRole', params)
+  }
+
+  async userDelete(uid) {
+    return Parse.Cloud.run('user:delete', { uid })
   }
 
   async getTotalCampaign() {
@@ -156,6 +173,28 @@ class ParseServer {
    */
   async getTokenTxHistory(params) {
     return Parse.Cloud.run('tokenTx:getHistory', params)
+  }
+
+  /**
+   * @function getWalletTxHistoryByCampaign
+   * Returns token transaction history of a user in a specific campaign
+   *
+   * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
+   * @returns  {Object}
+   */
+  async getWalletTxHistoryByCampaign(params) {
+    return await Parse.Cloud.run('walletTx:getByCampaign', params)
+  }
+
+  /**
+   * @function getWalletTxHistory
+   * Returns wallet transaction history of a user
+   *
+   * @param {{ uid: string, cid: string, fromDate: date, toDate: date }} params
+   * @returns {Object}
+   */
+  async getWalletTxHistory(params) {
+    return Parse.Cloud.run('walletTx:getHistory', params)
   }
 
   /**
