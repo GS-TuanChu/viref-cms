@@ -47,10 +47,14 @@ export default {
       this.flag = flag
     },
     logoutUser() {
-      this.logout()
-      this.$router.push({
-        path: '/account/login',
-      })
+      this.$store
+        .dispatch('authparse/logout')
+        .then(() => {
+          this.$router.push({
+            name: 'login',
+          })
+        })
+        .catch((error) => console.log(error))
     },
   },
 }
@@ -291,7 +295,7 @@ export default {
               $t('navbar.dropdown.marcus.list.profile')
             }}</span>
           </a>
-          <a class="dropdown-item" href="/logout">
+          <a class="dropdown-item" @click="logoutUser">
             <i
               class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"
             ></i>
