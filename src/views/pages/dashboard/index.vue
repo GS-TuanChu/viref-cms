@@ -96,9 +96,12 @@ export default {
         })
     },
     getUsers(fromDate = null, toDate = null) {
-      this.$parse.getUsers({ fromDate, toDate }).then((res) => {
-        this.userData = res
-      })
+      this.$parse
+        .getUsers({ fromDate, toDate })
+        .then((res) => {
+          this.userData = res
+        })
+        .catch((err) => this.$router.push({ name: 'error-500' }))
     },
   },
 }

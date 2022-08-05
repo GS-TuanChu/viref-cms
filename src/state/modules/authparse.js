@@ -6,8 +6,7 @@ export const mutations = {
   },
 
   REMOVE_CURRENT_USER() {
-    localStorage.removeItem('currentUser')
-    localStorage.removeItem('isAdmin')
+    localStorage.clear()
   },
 
   SET_ISADMIN(state, newValue) {
@@ -20,7 +19,9 @@ export const actions = {
       const user = await getParseServer().logIn(params)
       let isAdmin = false
       if (user) {
-        const isUserAdmin = await getParseServer().isAdmin({ uid: user.id })
+        const isUserAdmin = await getParseServer()
+          .isAdmin({ uid: user.id })
+          .catch((err) => console.log(err))
         if (isUserAdmin) isAdmin = true
       }
       commit('SET_CURRENT_USER', user)
