@@ -16,6 +16,9 @@ import App from './App.vue'
 // As a plugin
 import VueMask from 'v-mask'
 Vue.config.productionTip = false
+Vue.config.errorHandler = function(err, vm, info) {
+  console.log(`Error ${err} ${info}`)
+}
 
 import { initParseServer } from './helpers/parseserver'
 

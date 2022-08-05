@@ -1,10 +1,12 @@
 <script>
-import Layout from '../../layouts/main'
+import Layout from '@/views/layouts/main'
 import PageHeader from '@/components/page-header'
 import { userMethods, userComputed } from '@/state/helpers'
 import { integer } from 'vuelidate/lib/validators'
+import { constructUserObject } from '@/helpers/users'
 import errorMixin from '@/mixins/error'
 
+// Custom validation for changing user's balance
 function editBalanceValidation() {
   if (this.showBalanceEdit) {
     if (this.amount && !this.note) return false
@@ -22,10 +24,10 @@ function amountValidation() {
 }
 
 export default {
-  components: { Layout, PageHeader },
   page: {
     title: 'User Edit',
   },
+  components: { Layout, PageHeader },
   mixins: [errorMixin],
   data() {
     return {
@@ -84,9 +86,8 @@ export default {
   created() {
     this.query = this.$route.query
     this.$parse.getUserDetail(this.$route.params.id).then((dataUser) => {
-      this.constructUserObject(dataUser)
+      this._constructUserObject(dataUser)
       this.selected = [...this.params.roles]
-      this.watchHandler()
     })
     this.$parse.getCurrencyList().then((res) => {
       this.currencies = [...res]
@@ -94,33 +95,8 @@ export default {
   },
   methods: {
     ...userMethods,
-    watchHandler() {
-      const watchParams = [
-        'params.phone',
-        'params.username',
-        'params.email',
-        'params.bankAccount',
-        'amount',
-        'params.balanceToken',
-        'selected',
-      ]
-      watchParams.forEach((p) => {
-        this.$watch(p, () => {
-          if (p === 'selected') this.isRoleChanged = true
-          this.isDisabled = false
-        })
-      })
-    },
-    constructUserObject(data) {
-      this.params = {
-        uid: data.user.id,
-        username: data.user.get('username'),
-        email: data.user.get('email'),
-        phone: data.user.get('phone'),
-        roles: data.roles,
-        bankAccount: data.user.get('bankAccount') || '0',
-        balanceToken: data.user.get('balanceToken') || 0,
-      }
+    _constructUserObject(data) {
+      this.params = constructUserObject(data)
       this.balances = [...data.balance]
       if (this.balances && this.balances.length) {
         this.selectedCurrency = this.balances[0].id
@@ -138,7 +114,7 @@ export default {
           })
           removeRoles.forEach((r) => {
             param = {
-              id: this.params.uid,
+              uid: this.params.id,
               role: r,
               operation: 'remove',
             }
@@ -146,7 +122,7 @@ export default {
           })
           this.selected.forEach((r) => {
             param = {
-              id: this.params.uid,
+              uid: this.params.id,
               role: r,
               operation: 'add',
             }
@@ -264,7 +240,6 @@ export default {
                       >
                     </template>
                   </b-form-select>
-
                   <b-button variant="primary" @click="editBalanceHandler">{{
                     balanceButton
                   }}</b-button>

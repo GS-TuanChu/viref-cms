@@ -1,15 +1,14 @@
 <script>
-import Layout from '../../layouts/main'
+import Layout from '@/views/layouts/main'
 import PageHeader from '@/components/page-header'
 import { userMethods, userComputed } from '@/state/helpers'
-import usersMixin from '@/mixins/users.js'
+import { constructUserObject } from '@/helpers/users'
 
 export default {
   page: {
     title: 'User List',
   },
   components: { Layout, PageHeader },
-  mixins: [usersMixin],
   data() {
     return {
       title: 'Users',
@@ -45,21 +44,16 @@ export default {
       searchResults: [],
       isSearching: false,
       isFetching: false,
-      processPages: [],
     }
   },
   computed: {
     ...userComputed,
   },
   watch: {
+    // Query records upon changing page
     '$route.query.page': {
       handler(newValue) {
-        if (this.processPages.indexOf(newValue) != -1) {
-          return
-        }
         this.isFetching = true
-        this.processPages.push(newValue)
-
         this.fetchUsers({
           limit: this.limit,
           skip: newValue * this.limit - this.limit,
@@ -67,7 +61,6 @@ export default {
         }).then(() => {
           this.isFetching = false
           this.dataUsers = this.users
-          this.$forceUpdate()
         })
       },
       deep: true,
@@ -77,14 +70,6 @@ export default {
         .push({
           name: 'users',
           query: { ...this.$route.query, page: newValue },
-        })
-        .catch(() => {})
-    },
-    perPage(newValue) {
-      this.$router
-        .push({
-          name: 'users',
-          query: { ...this.$route.query, perPage: newValue },
         })
         .catch(() => {})
     },
@@ -100,7 +85,6 @@ export default {
   },
   created() {
     this.currentPage = this.$route.query.page || 1
-    this.perPage = this.$route.query.perPage || this.perPage
   },
   mounted() {
     this.fetchUsers({
@@ -138,12 +122,12 @@ export default {
       }
       return false
     },
-    async searchHandler() {
+    searchHandler() {
       const searchText = this.filter.trim()
       if (searchText) {
         this.$parse.searchUser({ searchText }).then((res) => {
           this.isSearching = false
-          this.searchResults = this.constructUserObject(res)
+          this.searchResults = constructUserObject(res)
         })
       }
       this.searchResults.splice(0, this.searchResults.length)
@@ -191,7 +175,7 @@ export default {
                           <div v-if="!isSearching && searchResults.length">
                             <template v-for="(item, index) of searchResults">
                               <div :key="index" class="search-results-item">
-                                <span @click="editUser(item.id)">
+                                <span @click="editUser(item.uid)">
                                   {{ item.username }}
                                 </span>
                               </div>
@@ -237,7 +221,7 @@ export default {
                 :sort-desc.sync="sortDesc"
               >
                 <template v-slot:cell(name)="data">
-                  <div @click="editUser(data.item.id)" class="user">
+                  <div @click="editUser(data.item.uid)" class="user">
                     <img
                       v-if="data.item.profile"
                       :src="data.item.profile"
@@ -268,7 +252,7 @@ export default {
                   }}</a>
                 </template>
                 <template v-slot:cell(userId)="data">
-                  <a class="text-body">{{ data.item.id }}</a>
+                  <a class="text-body">{{ data.item.uid }}</a>
                 </template>
                 <template v-slot:cell(phone)="data">
                   <a class="text-body">{{ data.item.phone }}</a>
@@ -292,7 +276,7 @@ export default {
                       <a
                         href="javascript:void(0);"
                         class="px-2 text-primary"
-                        @click="editUser(data.item.id)"
+                        @click="editUser(data.item.uid)"
                         title="Edit"
                       >
                         <i class="uil uil-pen font-size-18"></i>
