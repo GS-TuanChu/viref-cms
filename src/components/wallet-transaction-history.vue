@@ -1,5 +1,5 @@
 <script>
-import usersMixin from '@/mixins/users'
+import { constructUserObject } from '@/helpers/users'
 import campaignsMixin from '@/mixins/campaigns'
 import vClickOutside from 'v-click-outside'
 import Chart from '@/views/pages/dashboard/token-transactions'
@@ -10,7 +10,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 export default {
   name: 'WalletTransactionHistory',
   components: { Chart, Calendar },
-  mixins: [usersMixin, campaignsMixin, errorMixin],
+  mixins: [campaignsMixin, errorMixin],
   data() {
     return {
       user: null,
@@ -141,7 +141,7 @@ export default {
         this.$parse
           .searchUser({ searchText })
           .then((res) => {
-            this.searchUsers = this.constructUserObject(res)
+            this.searchUsers = constructUserObject(res)
             this.isSearching = false
           })
           .catch((error) => console.log(error))

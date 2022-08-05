@@ -101,7 +101,7 @@ export default {
         .then((res) => {
           this.userData = res
         })
-        .catch((err) => this.$router.push({ name: 'error-500' }))
+        .catch(() => this.$router.push({ name: 'error-500' }))
     },
   },
 }
