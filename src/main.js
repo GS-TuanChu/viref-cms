@@ -7,6 +7,7 @@ import VueApexCharts from 'vue-apexcharts'
 import VueSweetalert2 from 'vue-sweetalert2'
 import VueSlideBar from 'vue-slide-bar'
 import Vuelidate from 'vuelidate'
+import ExportCSV from 'vue-json-csv'
 
 import i18n from './i18n'
 import store from '@/state/store'
@@ -27,6 +28,7 @@ import ParsePlugin from './helpers/parseserver'
 // init Parse Server
 initParseServer()
 
+Vue.component('ExportCSV', ExportCSV)
 Vue.component('VueSlideBar', VueSlideBar)
 Vue.use(BootstrapVue)
 Vue.use(vco)

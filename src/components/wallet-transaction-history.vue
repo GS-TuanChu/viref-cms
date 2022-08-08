@@ -143,6 +143,7 @@ export default {
           .then((res) => {
             this.searchUsers = constructUserObject(res)
             this.isSearching = false
+            console.log(this.searchUsers)
           })
           .catch((error) => console.log(error))
       } else this.userSearchModalOpened = false
@@ -160,10 +161,11 @@ export default {
       } else this.userSearchModalOpened = false
       this.searchCampaigns.splice(0, this.searchCampaigns.length)
     },
+    // user selected from the search results
     selectUser(item) {
       this.isSelectedUser = true
       this.user = item.username
-      this.uid = item.id
+      this.uid = item.uid
       this.userSearchModalOpened = false
       this.campaignSearchModalOpened = false
     },
@@ -419,6 +421,11 @@ export default {
       <div v-show="!isSearchingToken && Object.keys(walletHistoryData).length">
         <Chart class="card" :data-object="walletHistoryData" />
         <br />
+        <div class="d-inline-block">
+          <ExportCSV class="mb-3" :data="walletTxHistoryDetails">
+            <b-button variant="primary">Export to CSV</b-button>
+          </ExportCSV>
+        </div>
         <div class="card">
           <b-table striped :items="walletTxHistoryDetails" :fields="fields">
             <template #cell(walletTransactionId)="data">

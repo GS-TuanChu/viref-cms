@@ -165,7 +165,7 @@ export default {
     selectUser(item) {
       this.isSelectedUser = true
       this.user = item.username
-      this.uid = item.id
+      this.uid = item.uid
       this.userSearchModalOpened = false
       this.campaignSearchModalOpened = false
     },
@@ -414,6 +414,11 @@ export default {
       <div v-show="!isSearchingToken && Object.keys(tokenHistoryData).length">
         <Chart class="card" :data-object="tokenHistoryData" />
         <br />
+        <div class="d-inline-block">
+          <ExportCSV class="mb-3" :data="tokenTxHistoryDetails">
+            <b-button variant="primary">Export to CSV</b-button>
+          </ExportCSV>
+        </div>
         <div class="card">
           <b-table striped :items="tokenTxHistoryDetails" :fields="fields">
             <template #cell(tokenTransactionId)="data">

@@ -26,7 +26,7 @@
     "chart.js": "^2.9.4",
     "chartist": "^0.11.4",
     "core-js": "^3.6.5",
-    "echarts": "^5.0.1",
+    "echarts": "^4.1.0",
     "firebase": "^8.2.4",
     "leaflet": "^1.7.1",
     "magic-sdk": "^8.1.0",
@@ -51,6 +51,7 @@
     "vue-flatpickr-component": "^8.1.7",
     "vue-form-wizard": "^0.8.4",
     "vue-i18n": "^8.22.4",
+    "vue-json-csv": "^1.2.12",
     "vue-meta": "^2.4.0",
     "vue-multiselect": "^2.1.6",
     "vue-number-input-spinner": "^2.2.0",
@@ -83,11 +84,18 @@
     "env": {
       "node": true
     },
-    "extends": ["plugin:vue/essential", "eslint:recommended"],
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
     "parserOptions": {
       "parser": "babel-eslint"
     },
     "rules": {}
   },
-  "browserslist": ["> 1%", "last 2 versions", "not dead"]
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }
