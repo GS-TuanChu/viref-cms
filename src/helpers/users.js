@@ -1,5 +1,5 @@
 export const constructUserObject = function(data) {
-  if (data && data.length)
+  if (data && data.length) {
     return data.map((dataUser) => ({
       uid: dataUser.user.id,
       username: dataUser.user.get('username'),
@@ -11,7 +11,7 @@ export const constructUserObject = function(data) {
       balanceToken: dataUser.user.get('balanceToken'),
       balance: dataUser.user.get('balance'),
     }))
-  else if (data !== null && typeof data === 'object' && !Array.isArray(data))
+  } else if (data !== null && typeof data === 'object' && !Array.isArray(data))
     return {
       uid: data.user.id,
       username: data.user.get('username'),
